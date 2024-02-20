@@ -1,5 +1,5 @@
 # FLMR
-The huggingface implementation of Fine-grained Late-interaction Multi-modal Retriever.
+The huggingface-transformers implementation of Fine-grained Late-interaction Multi-modal Retriever.
 
 The official implementation is at [here](https://github.com/LinWeizheDragon/Retrieval-Augmented-Visual-Question-Answering).
 
@@ -41,7 +41,7 @@ print(res)
 ```
 
 
-## Use example scripts
+## Example scripts to run indexing and retrieval with FLMR or PreFLMR
 
 ### Environment
 
