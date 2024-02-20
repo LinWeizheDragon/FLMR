@@ -117,8 +117,8 @@ python example_use_flmr.py \
             --experiment_name OKVQA_GS \
             --indexing_batch_size 64 \
             --image_root_dir /path/to/KBVQA_data/ok-vqa/ \
-            --dataset_path LinWeizheDragon/OKVQA_FLMR_preprocessed_data \
-            --passage_dataset_path LinWeizheDragon/OKVQA_FLMR_preprocessed_GoogleSearch_passages \
+            --dataset_path BByrneLab/OKVQA_FLMR_preprocessed_data \
+            --passage_dataset_path BByrneLab/OKVQA_FLMR_preprocessed_GoogleSearch_passages \
             --use_split test \
             --nbits 8 \
             --Ks 1 5 10 20 50 100 \
@@ -143,8 +143,8 @@ python example_use_preflmr.py \
             --experiment_name EVQA \
             --indexing_batch_size 64 \
             --image_root_dir /rds/project/rds-hirYTW1FQIw/shared_space/vqa_data/KBVQA_data/EVQA/eval_image/ \
-            --dataset_path LinWeizheDragon/EVQA_PreFLMR_preprocessed_data \
-            --passage_dataset_path LinWeizheDragon/EVQA_PreFLMR_preprocessed_passages \
+            --dataset_path BByrneLab/EVQA_PreFLMR_preprocessed_data \
+            --passage_dataset_path BByrneLab/EVQA_PreFLMR_preprocessed_passages \
             --use_split test \
             --nbits 8 \
             --Ks 1 5 10 20 50 100 \
