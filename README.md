@@ -153,3 +153,6 @@ python example_use_preflmr.py \
             --query_batch_size 8 \
             --run_indexing
 ```
+
+## Note
+The FLMR model is implemented following the documentation style of `transformers`. You can find detailed documentation in the modeling files. 
