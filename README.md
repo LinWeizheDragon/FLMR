@@ -107,7 +107,7 @@ cd examples/
 
 Download `KBVQA_data` from [here](https://huggingface.co/datasets/BByrneLab/RAVQAV2Data) and unzip the image folders.
 
-Run the following command:
+Run the following command (remove `--run_indexing` if you have already run indexing once):
 
 ```
 python example_use_flmr.py \
@@ -133,11 +133,11 @@ python example_use_flmr.py \
 cd examples/
 ```
 
-Run the following command:
+Run the following command (remove `--run_indexing` if you have already run indexing once):
 
 ```
 python example_use_preflmr.py \
-            --use_gpu \
+            --use_gpu --run_indexing \
             --index_root_path "." \
             --index_name EVQA_PreFLMR_ViT-G \
             --experiment_name EVQA \
