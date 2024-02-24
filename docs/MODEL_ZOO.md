@@ -6,7 +6,7 @@ For the huggingface implementation, we provide four pretrained checkpoints of FL
 PreFLMR is pretrained on WIT, CC3M, MSMARCO, KVQA, LLaVA, OVEN, OKVQA, Infoseek and E-VQA datasets. For details on the split for training and evaluation, hyperparameter used for training the PreFLMR models, please refer to the paper [PreFLMR: Scaling Up Fine-Grained Late-Interaction Multi-modal Retrievers](https://arxiv.org/abs/2402.08327). Here, we release three pretrained checkpoints:
 
 | Model   | Vision Encoder | Text Encoder | Checkpoint Name   | No. Param. | WIT   | LLaVA  | OVEN  | KVQA  | IGLUE | Infoseek | E-VQA | OKVQA | MSMARCO |
-|---------|----------------|--------------|-------------------------------------------------------------|-------|-------|--------|-------|-------|-------|----------|-------|--------|
+|---------|----------------|--------------|-------------------------------------------------------------|-------|-------|--------|-------|-------|-------|----------|-------|--------|-------|
 | PreFLMR | ViT-B          | Base-v2      | [LinWeizheDragon/PreFLMR_ViT-B](https://huggingface.co/LinWeizheDragon/PreFLMR_ViT-B) | 327M | 41.7  | 67.2   | 46.3  | 28.6  | 57.3  | 48.8 | 67.9 | 66.1 | 79.5 |
 | PreFLMR | ViT-L          | Base-v2      | [LinWeizheDragon/PreFLMR_ViT-L](https://huggingface.co/LinWeizheDragon/PreFLMR_ViT-L) | 543M | 60.5  | 71.8   | 59.8  | 43.6  | 69.2  | 57.9 | 70.8 | 68.5 | 78.7 |
 | PreFLMR | ViT-G          | Base-v2      | [LinWeizheDragon/PreFLMR_ViT-G](https://huggingface.co/LinWeizheDragon/PreFLMR_ViT-G) | 2.1B | 61.5  | 72.4   | 63.4  | 42.1  |71.5  | 59.6 | 73.1 | 68.6 | 78.6 |
