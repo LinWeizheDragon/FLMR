@@ -3,6 +3,10 @@ The huggingface-transformers implementation of Fine-grained Late-interaction Mul
 
 The official implementation is at [here](https://github.com/LinWeizheDragon/Retrieval-Augmented-Visual-Question-Answering).
 
+The details of the model and checkpoints can be found [here](docs/MODEL_ZOO.md).
+
+The details for reproducing the datasets and evaluation in the paper will be released soon.
+
 ## Table of Contents
 - [FLMR](#flmr)
   - [Table of Contents](#table-of-contents)
@@ -16,6 +20,7 @@ The official implementation is at [here](https://github.com/LinWeizheDragon/Retr
     - [Use FLMR](#use-flmr)
     - [Use PreFLMR](#use-preflmr)
   - [Note](#note)
+  - [Citation](#citation)
 
 
 ## How to use this package
@@ -24,8 +29,8 @@ The official implementation is at [here](https://github.com/LinWeizheDragon/Retr
 
 Create virtualenv:
 ```
-conda create -n FLMR_new python=3.10 -y
-conda activate FLMR_new
+conda create -n FLMR python=3.10 -y
+conda activate FLMR
 ```
 Install Pytorch:
 ```
@@ -58,7 +63,7 @@ pip install -e .
 
 Install other dependencies
 ```
-pip install ujson gitpython easydict ninja datasets
+pip install ujson gitpython easydict ninja datasets transformers
 ```
 
 ### Index a custom document collection
@@ -316,3 +321,27 @@ python example_use_preflmr.py \
 
 ## Note
 The FLMR model is implemented following the documentation style of `transformers`. You can find detailed documentation in the modeling files. 
+
+
+## Citation
+If our work helped your research, please kindly cite our paper for FLMR and PreFLMR. 
+```
+@inproceedings{
+    lin2023finegrained,
+    title={Fine-grained Late-interaction Multi-modal Retrieval for Retrieval Augmented Visual Question Answering},
+    author={Weizhe Lin and Jinghong Chen and Jingbiao Mei and Alexandru Coca and Bill Byrne},
+    booktitle={Thirty-seventh Conference on Neural Information Processing Systems},
+    year={2023},
+    url={https://openreview.net/forum?id=IWWWulAX7g}
+        }
+        
+@article{Lin_Mei_Chen_Byrne_2024, 
+        title={PreFLMR: Scaling Up Fine-Grained Late-Interaction Multi-modal Retrievers}, 
+        url={http://arxiv.org/abs/2402.08327}, 
+        number={arXiv:2402.08327}, 
+        publisher={arXiv}, 
+        author={Lin, Weizhe and Mei, Jingbiao and Chen, Jinghong and Byrne, Bill}, 
+        year={2024}}
+
+```
+
