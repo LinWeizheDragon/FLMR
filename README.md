@@ -1,5 +1,5 @@
 # FLMR
-The huggingface implementation of Fine-grained Late-interaction Multi-modal Retriever.
+The huggingface-transformers implementation of Fine-grained Late-interaction Multi-modal Retriever.
 
 The official implementation is at [here](https://github.com/LinWeizheDragon/Retrieval-Augmented-Visual-Question-Answering).
 
@@ -250,7 +250,7 @@ cd examples/
 
 Download `KBVQA_data` from [here](https://huggingface.co/datasets/BByrneLab/RAVQAV2Data) and unzip the image folders. The ROI/captioning/object detection results have been included.
 
-Run the following command:
+Run the following command (remove `--run_indexing` if you have already run indexing once):
 
 ```
 python example_use_flmr.py \
@@ -278,11 +278,11 @@ You can download the E-VQA images from https://github.com/google-research/google
 cd examples/
 ```
 
-Run the following command:
+Run the following command (remove `--run_indexing` if you have already run indexing once):
 
 ```
 python example_use_preflmr.py \
-            --use_gpu \
+            --use_gpu --run_indexing \
             --index_root_path "." \
             --index_name EVQA_PreFLMR_ViT-G \
             --experiment_name EVQA \
@@ -298,3 +298,6 @@ python example_use_preflmr.py \
             --query_batch_size 8 \
             --run_indexing
 ```
+
+## Note
+The FLMR model is implemented following the documentation style of `transformers`. You can find detailed documentation in the modeling files. 
