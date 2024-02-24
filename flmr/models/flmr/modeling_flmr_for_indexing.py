@@ -164,12 +164,12 @@ class FLMRModelForIndexing(FLMRModelForRetrieval):
                             keep_dims=keep_dims_, 
                             return_mask=return_mask, 
                             to_cpu=to_cpu,
+                            concat_output_from_vision_encoder=True,
                         )
                     else:
                         # Open the images in image_paths and convert to pixel_values by using ImageProcessor
                         images = [Image.open(image_path).convert("RGB") for image_path in image_paths]
                         pixel_values = self.image_processor(images, return_tensors="pt").pixel_values
-                        print(pixel_values.shape)
                         context_output = self.doc(
                             input_ids, 
                             attention_mask, 
@@ -177,6 +177,7 @@ class FLMRModelForIndexing(FLMRModelForRetrieval):
                             keep_dims=keep_dims_, 
                             return_mask=return_mask, 
                             to_cpu=to_cpu,
+                            concat_output_from_vision_encoder=True,
                         )
                 else:
                     input_ids, attention_mask = batch

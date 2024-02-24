@@ -39,16 +39,16 @@ class Searcher:
         self.collection = Collection.cast(collection or self.config.collection)
         self.configure(checkpoint=self.checkpoint, collection=self.collection)
 
-        query_tokenizer = FLMRQueryEncoderTokenizer.from_pretrained(self.config.checkpoint, subfolder="query_tokenizer")
-        context_tokenizer = FLMRContextEncoderTokenizer.from_pretrained(self.config.checkpoint, subfolder="context_tokenizer")
-        self.checkpoint = FLMRModelForIndexing.from_pretrained(self.config.checkpoint, 
-                                                                query_tokenizer=query_tokenizer, 
-                                                                context_tokenizer=context_tokenizer)
+        # query_tokenizer = FLMRQueryEncoderTokenizer.from_pretrained(self.config.checkpoint, subfolder="query_tokenizer")
+        # context_tokenizer = FLMRContextEncoderTokenizer.from_pretrained(self.config.checkpoint, subfolder="context_tokenizer")
+        # self.checkpoint = FLMRModelForIndexing.from_pretrained(self.config.checkpoint, 
+        #                                                         query_tokenizer=query_tokenizer, 
+        #                                                         context_tokenizer=context_tokenizer)
         
         self.configure()
         use_gpu = self.config.total_visible_gpus > 0
-        if use_gpu:
-            self.checkpoint = self.checkpoint.cuda()
+        # if use_gpu:
+        #     self.checkpoint = self.checkpoint.cuda()
         self.ranker = IndexScorer(self.index, use_gpu)
 
         print_memory_stats()

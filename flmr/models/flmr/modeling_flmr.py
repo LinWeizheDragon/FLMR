@@ -1304,7 +1304,7 @@ class FLMRModelForRetrieval(FLMRPretrainedModelForRetrieval):
             # TODO: fix the engine to support masks with discontinuous 0 and 1.
             D = torch.cat([vision_embeddings, text_embeddings], dim=1)
             # concatenate the mask
-            mask = torch.cat([mask, image_mask], dim=1)
+            mask = torch.cat([image_mask, mask], dim=1)
         elif concat_output_from_vision_encoder:
             D = vision_embeddings
             mask = image_mask
