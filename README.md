@@ -3,6 +3,21 @@ The huggingface-transformers implementation of Fine-grained Late-interaction Mul
 
 The official implementation is at [here](https://github.com/LinWeizheDragon/Retrieval-Augmented-Visual-Question-Answering).
 
+## Table of Contents
+- [FLMR](#flmr)
+  - [Table of Contents](#table-of-contents)
+  - [How to use this package](#how-to-use-this-package)
+    - [Environment](#environment)
+    - [Index a custom document collection](#index-a-custom-document-collection)
+    - [Search a custom document collection](#search-a-custom-document-collection)
+    - [Training with contrastive learning](#training-with-contrastive-learning)
+  - [Alternative: use transformers.AutoModel to load pre-trained models](#alternative-use-transformersautomodel-to-load-pre-trained-models)
+  - [Use example scripts](#use-example-scripts)
+    - [Use FLMR](#use-flmr)
+    - [Use PreFLMR](#use-preflmr)
+  - [Note](#note)
+
+
 ## How to use this package
 
 ### Environment
@@ -183,7 +198,7 @@ pip install ujson gitpython easydict ninja datasets
         print(df)
     ```
 
-## Training with contrastive learning
+### Training with contrastive learning
 ```python
 import torch
 from flmr import FLMRQueryEncoderTokenizer, FLMRContextEncoderTokenizer, FLMRModelForRetrieval
