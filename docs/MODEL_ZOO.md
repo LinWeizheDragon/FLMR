@@ -7,9 +7,9 @@ PreFLMR is pretrained on WIT, CC3M, MSMARCO, KVQA, LLaVA, OVEN, OKVQA, Infoseek 
 
 | Model   | Vision Encoder | Text Encoder | Checkpoint Name   | No. Param. | WIT   | LLaVA  | OVEN  | KVQA  | IGLUE | Infoseek | E-VQA | OKVQA |
 |---------|----------------|--------------|-------------------------------------------------------------|-------|-------|--------|-------|-------|-------|----------|-------|--------|
-| PreFLMR | ViT-B          | Base-v2      | [LinWeizheDragon/PreFLMR_ViT-B](https://huggingface.co/LinWeizheDragon/PreFLMR_ViT-B) | 327M |34.2  | 50.9   | 46.1  | 28.9  | 60.5  | 42.5     | 32.7  | 46.5   |
-| PreFLMR | ViT-L          | Base-v2      | [LinWeizheDragon/PreFLMR_ViT-L](https://huggingface.co/LinWeizheDragon/PreFLMR_ViT-L) | 543M |49.6  | 51.2   | 54.8  | 40.5  | 69.5  | 48.7     | 45.0  | 50.9   |0
-| PreFLMR | ViT-G          | Base-v2      | [LinWeizheDragon/PreFLMR_ViT-G](https://huggingface.co/LinWeizheDragon/PreFLMR_ViT-G) | 2.1B | 49.5  | 51.8   | 59.6  | 38.7  | 69.3  | 50.9     | 42.4  | 52.1   |
+| PreFLMR | ViT-B          | Base-v2      | [LinWeizheDragon/PreFLMR_ViT-B](https://huggingface.co/LinWeizheDragon/PreFLMR_ViT-B) | 327M | 41.7  | 67.2   | 46.3  | 28.6  | 57.3  | 48.8 | 67.9 | 66.1 |
+| PreFLMR | ViT-L          | Base-v2      | [LinWeizheDragon/PreFLMR_ViT-L](https://huggingface.co/LinWeizheDragon/PreFLMR_ViT-L) | 543M | 60.5  | 71.8   | 59.8  | 43.6  | 69.2  | 57.9 | 70.8 | 68.5 |
+| PreFLMR | ViT-G          | Base-v2      | [LinWeizheDragon/PreFLMR_ViT-G](https://huggingface.co/LinWeizheDragon/PreFLMR_ViT-G) | 2.1B | 61.5  | 72.4   | 63.4  | 42.1  |71.5  | 59.6 | 73.1 | 68.6 | 
 
 For the evaluation metrics, WIT uses Recall@10, IGLUE uses Recall@1, all the rest datasets use Recall@5.
 
