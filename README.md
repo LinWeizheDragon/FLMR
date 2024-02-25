@@ -315,8 +315,7 @@ python example_use_preflmr.py \
             --Ks 1 5 10 20 50 100 \
             --checkpoint_path LinWeizheDragon/PreFLMR_ViT-G \
             --image_processor_name laion/CLIP-ViT-bigG-14-laion2B-39B-b160k \
-            --query_batch_size 8 \
-            --run_indexing
+            --query_batch_size 8 
 ```
 
 ## Note
