@@ -141,8 +141,8 @@ def query_index(args, ds, passage_contents, flmr_model: FLMRModelForRetrieval):
 def main(args):
     from datasets import load_dataset
 
-    ds = load_dataset(args.dataset_path)
-    passage_ds = load_dataset(args.passage_dataset_path)
+    ds = load_dataset(args.dataset_hf_path, args.dataset + "_data")
+    passage_ds = load_dataset(args.dataset_hf_path, args.dataset + "_passages")
 
     print("========= Loading dataset =========")
     print(ds)
@@ -271,9 +271,9 @@ if __name__ == "__main__":
     # all hardcode parameters should be here
     parser.add_argument("--query_batch_size", type=int, default=8)
     parser.add_argument("--num_ROIs", type=int, default=9)
-    parser.add_argument("--dataset_path", type=str, default="OKVQA_FLMR_prepared_data.hf")
+    parser.add_argument("--dataset_hf_path", type=str, default="")
     parser.add_argument(
-        "--passage_dataset_path", type=str, default="OKVQA_FLMR_prepared_passages_with_GoogleSearch_corpus.hf"
+        "--dataset", type=str, default="EVQA"
     )
     parser.add_argument("--image_root_dir", type=str, default="./ok-vqa/")
     parser.add_argument("--use_split", type=str, default="test")
@@ -298,8 +298,8 @@ if __name__ == "__main__":
             --experiment_name EVQA \
             --indexing_batch_size 64 \
             --image_root_dir /path/to/EVQA/eval_image/ \
-            --dataset_path BByrneLab/EVQA_PreFLMR_preprocessed_data \
-            --passage_dataset_path BByrneLab/EVQA_PreFLMR_preprocessed_passages \
+            --dataset_hf_path BByrneLab/multi_task_multi_modal_knowledge_retrieval_benchmark_M2KR \
+            --dataset EVQA \
             --use_split test \
             --nbits 8 \
             --Ks 1 5 10 20 50 100 \
