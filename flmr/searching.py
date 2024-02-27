@@ -11,19 +11,13 @@ from colbert.infra import ColBERTConfig, Run, RunConfig
 from easydict import EasyDict
 from PIL import Image
 
-
-def search_custom_collection(
-        queries: Dict[int, str],
-        query_embeddings: torch.tensor,
+def create_searcher(
         index_root_path: str = ".", 
         index_experiment_name: str = "default_experiment", 
         index_name: str = "index",
         use_gpu: bool = True,
         nbits: int = 8,
-        num_document_to_retrieve: int = 100,
-        remove_zero_tensors: bool = True,
-        centroid_search_batch_size: int = None,
-    ) -> Dict: 
+    ) -> Searcher:
     # Search documents
     with Run().context(RunConfig(nranks=1, rank=1, root=index_root_path, experiment=index_experiment_name)):
         if use_gpu:
@@ -37,6 +31,17 @@ def search_custom_collection(
         searcher = Searcher(
             index=f"{index_name}.nbits={nbits}", checkpoint=None, config=config
         )
+
+        return searcher
+
+def search_custom_collection(
+        searcher: Searcher,
+        queries: Dict[int, str],
+        query_embeddings: torch.tensor,
+        num_document_to_retrieve: int = 100,
+        remove_zero_tensors: bool = True,
+        centroid_search_batch_size: int = None,
+    ) -> Dict: 
 
         queries = Queries(data=queries)
 

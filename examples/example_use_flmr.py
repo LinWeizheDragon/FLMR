@@ -19,119 +19,116 @@ from PIL import Image
 
 from transformers import (
     AutoImageProcessor,
-    AutoTokenizer,
     AutoModel,
+    AutoTokenizer,
 )
-from flmr.models.flmr import (
+from flmr import (
     FLMRModelForRetrieval,
     FLMRQueryEncoderTokenizer,
     FLMRContextEncoderTokenizer,
 )
+from flmr import index_custom_collection
+from flmr import create_searcher, search_custom_collection
 
 
 def index_corpus(args, custom_collection):
     # Launch indexer
-    with Run().context(RunConfig(nranks=1, root=args.index_root_path, experiment=args.experiment_name)):
-        config = ColBERTConfig(
-            nbits=args.nbits,
-            doc_maxlen=512,
-            total_visible_gpus=1 if args.use_gpu else 0,
-        )
-        print("indexing with", args.nbits, "bits")
-
-        indexer = Indexer(checkpoint=args.checkpoint_path, config=config)
-        indexer.index(
-            name=f"{args.index_name}.nbits={args.nbits}",
-            collection=custom_collection,
-            batch_size=args.indexing_batch_size,
-            overwrite=True,
-        )
-        index_path = indexer.get_index()
-
-        return index_path
+    index_path = index_custom_collection(
+        custom_collection=custom_collection,
+        model=args.checkpoint_path,
+        index_root_path=args.index_root_path,
+        index_experiment_name=args.experiment_name,
+        index_name=args.index_name,
+        nbits=args.nbits, # number of bits in compression
+        doc_maxlen=512, # maximum allowed document length
+        overwrite=False, # whether to overwrite existing indices
+        use_gpu=args.use_gpu, # whether to enable GPU indexing
+        indexing_batch_size=args.indexing_batch_size,
+        model_temp_folder="tmp",
+        nranks=1, # number of GPUs used in indexing
+    )
+    return index_path
 
 
 def query_index(args, ds, passage_contents, flmr_model: FLMRModelForRetrieval):
     # Search documents
-    with Run().context(RunConfig(nranks=1, rank=1, root=args.index_root_path, experiment=args.experiment_name)):
-        if args.use_gpu:
-            total_visible_gpus = torch.cuda.device_count()
-        else:
-            total_visible_gpus = 0
+    # initiate a searcher
+    searcher = create_searcher(
+        index_root_path=args.index_root_path,
+        index_experiment_name=args.experiment_name,
+        index_name=args.index_name,
+        nbits=args.nbits, # number of bits in compression
+        use_gpu=args.use_gpu, # whether to enable GPU searching
+    )
 
-        config = ColBERTConfig(
-            total_visible_gpus=total_visible_gpus,
-        )
-        searcher = Searcher(
-            index=f"{args.index_name}.nbits={args.nbits}", checkpoint=args.checkpoint_path, config=config
-        )
+    def encode_and_search_batch(batch, Ks):
+        # encode queries
+        input_ids = torch.LongTensor(batch["input_ids"]).to("cuda")
+        # print(query_tokenizer.batch_decode(input_ids, skip_special_tokens=False))
+        attention_mask = torch.LongTensor(batch["attention_mask"]).to("cuda")
+        pixel_values = torch.FloatTensor(batch["pixel_values"]).to("cuda")
+        query_input = {
+            "input_ids": input_ids,
+            "attention_mask": attention_mask,
+            "pixel_values": pixel_values,
+        }
+        query_embeddings = flmr_model.query(**query_input).late_interaction_output
+        query_embeddings = query_embeddings.detach().cpu()
 
-        def encode_and_search_batch(batch, Ks):
-            # encode queries
-            input_ids = torch.LongTensor(batch["input_ids"]).to("cuda")
-            # print(query_tokenizer.batch_decode(input_ids, skip_special_tokens=False))
-            attention_mask = torch.LongTensor(batch["attention_mask"]).to("cuda")
-            pixel_values = torch.FloatTensor(batch["pixel_values"]).to("cuda")
-            query_input = {
-                "input_ids": input_ids,
-                "attention_mask": attention_mask,
-                "pixel_values": pixel_values,
-            }
-            query_embeddings = flmr_model.query(**query_input).late_interaction_output
-            query_embeddings = query_embeddings.detach().cpu()
-
-            # search
-            custom_quries = {
-                question_id: question for question_id, question in zip(batch["question_id"], batch["question"])
-            }
-            # print(custom_quries)
-            queries = Queries(data=custom_quries)
-            ranking = searcher._search_all_Q(
-                queries, query_embeddings, progress=False, batch_size=args.centroid_search_batch_size, k=max(Ks)
-            )
-
-            ranking_dict = ranking.todict()
-
-            # Process ranking data and obtain recall scores
-            recall_dict = defaultdict(list)
-            for question_id, answers in zip(batch["question_id"], batch["answers"]):
-                retrieved_docs = ranking_dict[question_id]
-                retrieved_docs = [doc[0] for doc in retrieved_docs]
-                retrieved_doc_texts = [passage_contents[doc_idx] for doc_idx in retrieved_docs]
-                hit_list = []
-                for retrieved_doc_text in retrieved_doc_texts:
-                    found = False
-                    for answer in answers:
-                        if answer.strip().lower() in retrieved_doc_text.lower():
-                            found = True
-                    if found:
-                        hit_list.append(1)
-                    else:
-                        hit_list.append(0)
-
-                # print(hit_list)
-                # input()
-                for K in Ks:
-                    recall = float(np.max(np.array(hit_list[:K])))
-                    recall_dict[f"Recall@{K}"].append(recall)
-
-            batch.update(recall_dict)
-            return batch
-
-        flmr_model = flmr_model.to("cuda")
-        print("Starting encoding...")
-        Ks = args.Ks
-        ds = ds.select(range(100))
-        ds = ds.map(
-            encode_and_search_batch,
-            fn_kwargs={"Ks": Ks},
-            batched=True,
-            batch_size=args.query_batch_size,
-            load_from_cache_file=False,
-            new_fingerprint="avoid_cache",
+        # search
+        custom_quries = {
+            question_id: question for question_id, question in zip(batch["question_id"], batch["question"])
+        }
+        ranking = search_custom_collection(
+            searcher=searcher,
+            queries=custom_quries,
+            query_embeddings=query_embeddings,
+            num_document_to_retrieve=max(Ks), # how many documents to retrieve for each query
+            centroid_search_batch_size=args.centroid_search_batch_size,
         )
 
-        return ds
+        ranking_dict = ranking.todict()
+
+        # Process ranking data and obtain recall scores
+        recall_dict = defaultdict(list)
+        for question_id, answers in zip(batch["question_id"], batch["answers"]):
+            retrieved_docs = ranking_dict[question_id]
+            retrieved_docs = [doc[0] for doc in retrieved_docs]
+            retrieved_doc_texts = [passage_contents[doc_idx] for doc_idx in retrieved_docs]
+            hit_list = []
+            for retrieved_doc_text in retrieved_doc_texts:
+                found = False
+                for answer in answers:
+                    if answer.strip().lower() in retrieved_doc_text.lower():
+                        found = True
+                if found:
+                    hit_list.append(1)
+                else:
+                    hit_list.append(0)
+
+            # print(hit_list)
+            # input()
+            for K in Ks:
+                recall = float(np.max(np.array(hit_list[:K])))
+                recall_dict[f"Recall@{K}"].append(recall)
+
+        batch.update(recall_dict)
+        return batch
+
+    flmr_model = flmr_model.to("cuda")
+    print("Starting encoding...")
+    Ks = args.Ks
+    # ds = ds.select(range(2000, 2100))
+    ds = ds.map(
+        encode_and_search_batch,
+        fn_kwargs={"Ks": Ks},
+        batched=True,
+        batch_size=args.query_batch_size,
+        load_from_cache_file=False,
+        new_fingerprint="avoid_cache",
+    )
+
+    return ds
 
 
 def main(args):

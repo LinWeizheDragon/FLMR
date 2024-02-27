@@ -171,16 +171,21 @@ pip install ujson gitpython easydict ninja datasets transformers
 
 3. Search the collection
     ```python
-    from flmr import search_custom_collection
+    from flmr import search_custom_collection, create_searcher
 
-    ranking = search_custom_collection(
-        queries=queries,
-        query_embeddings=query_embeddings,
+    # initiate a searcher
+    searcher = create_searcher(
         index_root_path=".",
         index_experiment_name="test_experiment",
         index_name="test_index",
         nbits=8, # number of bits in compression
         use_gpu=True, # whether to enable GPU searching
+    )
+    # Search the custom collection
+    ranking = search_custom_collection(
+        searcher=searcher,
+        queries=queries,
+        query_embeddings=query_embeddings,
         num_document_to_retrieve=5, # how many documents to retrieve for each query
     )
 

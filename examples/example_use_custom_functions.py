@@ -6,7 +6,7 @@ from torchvision.transforms import ToPILImage
 from transformers import AutoImageProcessor
 
 from flmr import index_custom_collection
-from flmr import search_custom_collection
+from flmr import create_searcher, search_custom_collection
 from flmr import FLMRQueryEncoderTokenizer, FLMRContextEncoderTokenizer, FLMRModelForRetrieval
 
 
@@ -94,15 +94,19 @@ if __name__ == "__main__":
 
     queries = {i: query_texts[i] for i in range(num_queries)}
 
-    # Search the custom collection
-    ranking = search_custom_collection(
-        queries=queries,
-        query_embeddings=query_embeddings,
+    # initiate a searcher
+    searcher = create_searcher(
         index_root_path=".",
         index_experiment_name="test_experiment",
         index_name="test_index",
         nbits=8, # number of bits in compression
         use_gpu=True, # whether to enable GPU searching
+    )
+    # Search the custom collection
+    ranking = search_custom_collection(
+        searcher=searcher,
+        queries=queries,
+        query_embeddings=query_embeddings,
         num_document_to_retrieve=5, # how many documents to retrieve for each query
     )
 
