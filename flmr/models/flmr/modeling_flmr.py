@@ -584,13 +584,14 @@ class FLMRModelForRetrieval(FLMRPretrainedModelForRetrieval):
         self.text_encoder_embedding_size = self.config.text_config.hidden_size
         self.late_interaction_embedding_size = self.config.dim
 
-        self.context_vision_projection = FLMRMultiLayerPerceptron(
-            (
-                self.vision_encoder_embedding_size,
-                (self.late_interaction_embedding_size * self.mapping_network_prefix_length) // 2,
-                self.late_interaction_embedding_size * self.mapping_network_prefix_length,
+        if self.config.use_vision_encoder:
+            self.context_vision_projection = FLMRMultiLayerPerceptron(
+                (
+                    self.vision_encoder_embedding_size,
+                    (self.late_interaction_embedding_size * self.mapping_network_prefix_length) // 2,
+                    self.late_interaction_embedding_size * self.mapping_network_prefix_length,
+                )
             )
-        )
 
         if self.config.use_vision_encoder:
             self.context_vision_encoder = FLMRVisionModel(config.vision_config)
@@ -636,13 +637,14 @@ class FLMRModelForRetrieval(FLMRPretrainedModelForRetrieval):
             self.query_text_encoder_linear = self.context_text_encoder_linear
             self._tied_weights_keys += ["context_text_encoder", "context_text_encoder_linear"]
 
-        if self.config.separate_query_and_context_vision_encoder:
-            self.query_vision_encoder = copy.deepcopy(self.context_vision_encoder)
-            self.query_vision_projection = copy.deepcopy(self.context_vision_projection)
-        else:
-            self.query_vision_encoder = self.context_vision_encoder
-            self.query_vision_projection = self.context_vision_projection
-            self._tied_weights_keys += ["context_vision_encoder", "context_vision_projection"]
+        if self.config.use_vision_encoder:
+            if self.config.separate_query_and_context_vision_encoder:
+                self.query_vision_encoder = copy.deepcopy(self.context_vision_encoder)
+                self.query_vision_projection = copy.deepcopy(self.context_vision_projection)
+            else:
+                self.query_vision_encoder = self.context_vision_encoder
+                self.query_vision_projection = self.context_vision_projection
+                self._tied_weights_keys += ["context_vision_encoder", "context_vision_projection"]
 
         if self.config.load_cpu_extension:
             try:
