@@ -189,7 +189,7 @@ To prepare the images for E-VQA, please refer to the [E-VQA Github page](https:/
 
 ## Reproduce PreFLMR results
 To reproduce the PreFLMR results, you can use the M2KR HF datasets and the PreFLMR models. You will need to change the `image_root_dir` to the correct path to the image directory.
-```python
+```bash
 python example_use_preflmr.py \
             --use_gpu --run_indexing \
             --index_root_path "." \
