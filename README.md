@@ -5,7 +5,7 @@ The official implementation is at [here](https://github.com/LinWeizheDragon/Retr
 
 The details of the model and checkpoints can be found [here](docs/MODEL_ZOO.md).
 
-The details for reproducing the datasets and evaluation in the paper will be released soon.
+The details for reproducing the datasets and evaluation in the paper can be found [here](docs/Datasets.md).
 
 ## Table of Contents
 - [FLMR](#flmr)
