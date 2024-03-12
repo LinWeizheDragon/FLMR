@@ -565,7 +565,6 @@ class FLMRModelForRetrieval(FLMRPretrainedModelForRetrieval):
             logger.warning(
                 "query_tokenizer is not provided. A tokenizer is initialized from `bert-base-uncased`. Please pass in an FLMRQueryEncoderTokenizer instance if you need to extend the vocabulary beyond the existing ones in the bert tokenizer."
             )
-            from transformers import FLMRQueryEncoderTokenizer
 
             # initialize a FLMRQueryEncoderTokenizer
             self.query_tokenizer = FLMRQueryEncoderTokenizer.from_pretrained("bert-base-uncased")
@@ -574,7 +573,6 @@ class FLMRModelForRetrieval(FLMRPretrainedModelForRetrieval):
             logger.warning(
                 "context_tokenizer is not provided. A tokenizer is initialized from `bert-base-uncased`. Please pass in an FLMRContextEncoderTokenizer instance if you need to extend the vocabulary beyond the existing ones in the bert tokenizer."
             )
-            from transformers import FLMRContextEncoderTokenizer
 
             # initialize a FLMRContextEncoderTokenizer
             self.context_tokenizer = FLMRContextEncoderTokenizer.from_pretrained("bert-base-uncased")
