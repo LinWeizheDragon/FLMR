@@ -127,7 +127,6 @@ We show the dataset statistics in the following table:
 
 ## Huggingface Datasets 
 We release the M2KR on the huggingface [BByrneLab/multi_task_multi_modal_knowledge_retrieval_benchmark_M2KR](https://huggingface.co/datasets/BByrneLab/multi_task_multi_modal_knowledge_retrieval_benchmark_M2KR). 
-For the CC3M pretraining dataset, we do not include them in the Huggingface datasets as we use the exact same split as in the [liuhaotian/LLaVA-CC3M-Pretrain-595K](https://huggingface.co/datasets/liuhaotian/LLaVA-CC3M-Pretrain-595K).  
 
 ## Example Use
 The datasets are available for download and use with the Huggingface datasets library. 
@@ -164,26 +163,98 @@ test_passages = WIT_passages['test_passages']
 ```
 
 ## Images
-In the HF datasets, we only include the image path to the dataset without the root image directory (e.g., `train2014/COCO_train2014_000000276336.jpg`). The base image directory can be set using the `image_root_dir` argument in our provided example script to run PreFLMR (i.e., `example_use_preflmr.py`). You will need to change the `image_root_dir` to the correct path to the image directory.
+In the HF datasets, we only include the image path to the dataset without the root image directory (e.g., `train2014/COCO_train2014_000000276336.jpg`). The base image directory can be set using the `image_root_dir` argument in our provided example script to run PreFLMR (i.e., `example_use_preflmr.py`) for each datasets/tasks. You will need to change the `image_root_dir` to the correct path to the image directory according to the datasets/tasks.
+
+In general, the image path structure should be `<image_root_dir>/<img_path>`, where `<img_path>` is provided with our HF datasets.
+```
+├── image_root_dir
+│   ├── ...
+```
 ### WIT 
-The WIT dataset images can be downloaded with the instruction from the [WIT Github page](https://github.com/google-research-datasets/wit/blob/main/DATA.md). The training images can be downloaded from [Kaggle](https://www.kaggle.com/competitions/wikipedia-image-caption/data) at a size around 275 GB. The validation and test images can be downloaded directly from the github page.
+The WIT dataset images can be downloaded with the instruction from the [WIT Github page](https://github.com/google-research-datasets/wit/blob/main/DATA.md). The training images can be downloaded from [Kaggle](https://www.kaggle.com/competitions/wikipedia-image-caption/data) at a size around 275 GB. The validation and test images can be downloaded directly from the github page. 
+
+The downloaded image directory should contains: `<image_id>.jpg` after unzipping. Your `image_root_dir` should be the path to the directory containing the unzipped images.
+
 #### IGLUE
-Following the instruction from the [IGLUE Github page](https://github.com/e-bug/iglue/tree/main/datasets), the IGLUE-WIT images can be downloaded from their [hosted server](https://sid.erda.dk/sharelink/CwTySJlPdB). You will need the WIT-en split images.   
+Following the instruction from the [IGLUE Github page](https://github.com/e-bug/iglue/tree/main/datasets), the IGLUE-WIT images can be downloaded from their [hosted server](https://sid.erda.dk/sharelink/CwTySJlPdB). You will only need the WIT-en split images. 
+
+The downloaded image directory should contains: `<image_id>.jpg` after unzipping.
+
 ### KVQA
-The KVQA dataset images can be downloaded from the [KVQA Project page](https://malllabiisc.github.io/resources/kvqa/) at a size around 25GB.
+The KVQA dataset images can be downloaded from the [KVQA Project page](https://malllabiisc.github.io/resources/kvqa/) at a size around 25GB. You will only need the `KVQAimgs.tar.gz` file.
+
+The downloaded image directory should contains: `<image_id>.jpg` after untaring.
+
 ### CC3M 
-We use the downsampled 595K version of CC3M from LLaVA. The images can be downloaded from the [LLaVA-CC3M-Pretrain-595K](https://huggingface.co/datasets/liuhaotian/LLaVA-CC3M-Pretrain-595K/tree/main). The images can be found in the `images.zip` in their repository.
+We use the downsampled 595K version of CC3M from LLaVA. The images can be downloaded from the [LLaVA-CC3M-Pretrain-595K](https://huggingface.co/datasets/liuhaotian/LLaVA-CC3M-Pretrain-595K/tree/main). The images can be found in the `images.zip` in their HF repository.
+
+The downloaded image directory should have the following structure after unzipping: `<image_id>.jpg`. The `image_id` starts with `GCC_train_`.
+
 ### OVEN
 The OVEN dataset images can be downloaded from the [OVEN Github page](https://github.com/edchengg/oven_eval/tree/main/image_downloads) with their provided script.
+
+You will need to download 6 shards of image tar files: `shard00-05.tar`. The downloaded image directory should have the following structure after unzipping: `00/<image_id>.jpg`, `01/<image_id>.jpg`, ...,  `05/<image_id>.jpg`.
+```
+├── image_root_dir
+│   ├── 00
+│   │   ├── oven_00xxxxx.jpg
+│   │   ├── ...
+│   ├── 01
+│   │   ├── oven_01xxxxx.jpg
+│   │   ├── ...
+│   ├── ...
+│   ├── 05
+│   │   ├── oven_05xxxxx.jpg
+│   │   ├── ...
+```
+
+
 ### LLaVA
-The [LLaVA-Instruct-150K](https://huggingface.co/datasets/liuhaotian/LLaVA-Instruct-150K) images are from MSCOCO, which can be downloaded here: [train2017](http://images.cocodataset.org/zips/train2017.zip). Alternatively, refer to the [MSCOCO website](https://cocodataset.org/#home).
+The [LLaVA-Instruct-150K](https://huggingface.co/datasets/liuhaotian/LLaVA-Instruct-150K) images are from MSCOCO, which can be downloaded here: [train2014](http://images.cocodataset.org/zips/train2014.zip). You may refer to the [MSCOCO website](https://cocodataset.org/#home).
+
+The downloaded image directory should have the following structure after unzipping: `train2014/<image_id>.jpg`
+
+```
+|── image_root_dir
+│   ├── train2014
+│   │   ├── COCO_train2014_000000276336.jpg
+│   │   ├── ....
+```
+
 ### OKVQA
-The preparation of the OKVQA dataset images can be found in the [OKVQA Project page](https://okvqa.allenai.org/download.html).
+The preparation of the OKVQA dataset images can be found in the [OKVQA Project page](https://okvqa.allenai.org/download.html). You will need to downlod the [train2014](http://images.cocodataset.org/zips/train2014.zip) and [val2014](http://images.cocodataset.org/zips/val2014.zip) images from the MSCOCO website.
+
+The downloaded image directory should have the following structure after unzipping: `train2014/<image_id>.jpg`, `val2014/<image_id>.jpg`
+
+```
+|── image_root_dir
+│   ├── train2014
+│   │   ├── ...
+│   ├── val2014
+│   │   ├── ...
+```
+
+
 ### Infoseek
 Infoseek is obtained from downsampling of the OVEN dataset.  
-Please refer to OVEN for the image download.
+You may use the full OVEN images for Infoseek. However, the `img_path` provided in our HF removes the `00/`, `01/`, ..., `05/` prefix from the OVEN images. You may create a folder that contains all the OVEN images with symlinks.  
+
+
 ### E-VQA
 To prepare the images for E-VQA, please refer to the [E-VQA Github page](https://github.com/google-research/google-research/tree/master/encyclopedic_vqa). You will need to download the iNaturalist 2021 and Google Landmarks Dataset V2 datasets. 
+
+You may expect the following structure after unzipping the downloaded images:
+```
+|── image_root_dir
+│   ├── inat
+│   │   ├── train
+│   │   │   ├── ...
+│   │   ├── val
+│   │   │   ├── ...
+│   ├── google-landmark
+│   │   ├── train
+│   │   │   ├── ...
+```
 
 
 
