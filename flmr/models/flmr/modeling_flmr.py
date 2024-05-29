@@ -737,10 +737,10 @@ class FLMRModelForRetrieval(FLMRPretrainedModelForRetrieval):
         use_in_batch_negatives: bool = True,
         in_batch_negatives_from_all_gpus: bool = False,
         num_negative_examples: int = 1,
-        query_concat_output_from_vision_encoder: Optional[bool] = None,
-        query_concat_output_from_text_encoder: Optional[bool] = None,
-        context_concat_output_from_vision_encoder: Optional[bool] = None,
-        context_concat_output_from_text_encoder: Optional[bool] = None,
+        query_concat_output_from_vision_encoder: Optional[Union[bool, list]] = None,
+        query_concat_output_from_text_encoder: Optional[Union[bool, list]] = None,
+        context_concat_output_from_vision_encoder: Optional[Union[bool, list]] = None,
+        context_concat_output_from_text_encoder: Optional[Union[bool, list]] = None,
         return_dict: bool = None,
         output_attentions: bool = None,
         output_hidden_states: bool = None,
@@ -842,11 +842,13 @@ class FLMRModelForRetrieval(FLMRPretrainedModelForRetrieval):
         batch_size = query_input_ids.shape[0]
         scores = scores.view(-1, num_negative_examples + 1)
         labels = torch.zeros(batch_size, dtype=torch.long, device=self.device)
-        loss = self.loss_fn(scores, labels)
+        
 
         if use_in_batch_negatives:
             ib_loss = self.compute_ib_loss_new(Q, D, D_mask)
+            loss = ib_loss
         else:
+            loss = self.loss_fn(scores, labels)
             ib_loss = None
 
         if output_attentions:
@@ -1053,8 +1055,8 @@ class FLMRModelForRetrieval(FLMRPretrainedModelForRetrieval):
         attention_mask: torch.Tensor,
         pixel_values: Optional[torch.Tensor] = None,
         image_features: Optional[torch.Tensor] = None,
-        concat_output_from_vision_encoder: Optional[bool] = None,
-        concat_output_from_text_encoder: Optional[bool] = None,
+        concat_output_from_vision_encoder: Optional[Union[bool, list]] = None,
+        concat_output_from_text_encoder: Optional[Union[bool, list]] = None,
         output_attentions: Optional[bool] = None,
         output_hidden_states: Optional[bool] = None,
     ):
@@ -1160,6 +1162,22 @@ class FLMRModelForRetrieval(FLMRPretrainedModelForRetrieval):
 
         if concat_output_from_vision_encoder and concat_output_from_text_encoder:
             Q = torch.cat([text_embeddings, vision_embeddings], dim=1)
+            if isinstance(concat_output_from_vision_encoder, list) or isinstance(concat_output_from_text_encoder, list):
+                # When lists are passed in, mask the output accordingly
+                assert isinstance(concat_output_from_vision_encoder, list) and isinstance(concat_output_from_text_encoder, list), "concat_output_from_vision_encoder and concat_output_from_text_encoder must be of the same type."
+                # obtain the size of each output
+                text_size = text_embeddings.shape[1]
+                vision_size = vision_embeddings.shape[1]
+
+                # Prepare the mask
+                concat_output_mask = torch.zeros_like(Q).to(Q.device)
+
+                # Mask the late interaction outputs
+                concat_output_mask[:, :text_size] = torch.tensor(concat_output_from_text_encoder).bool().unsqueeze(-1).unsqueeze(-1)
+                concat_output_mask[:, text_size:] = torch.tensor(concat_output_from_vision_encoder).bool().unsqueeze(-1).unsqueeze(-1)
+
+                Q = Q * concat_output_mask
+
         elif concat_output_from_vision_encoder:
             Q = vision_embeddings
         elif concat_output_from_text_encoder:
