@@ -45,7 +45,7 @@ def index_corpus(args, custom_collection):
         use_gpu=args.use_gpu, # whether to enable GPU indexing
         indexing_batch_size=args.indexing_batch_size,
         model_temp_folder="tmp",
-        nranks=1, # number of GPUs used in indexing
+        nranks=args.num_gpus, # number of GPUs used in indexing
     )
     return index_path
 
@@ -265,6 +265,7 @@ if __name__ == "__main__":
     # all hardcode parameters should be here
     parser.add_argument("--query_batch_size", type=int, default=8)
     parser.add_argument("--num_ROIs", type=int, default=9)
+    parser.add_argument("--num_gpus", type=int, default=1)
     parser.add_argument("--dataset_hf_path", type=str, default="")
     parser.add_argument(
         "--dataset", type=str, default="EVQA"
