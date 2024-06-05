@@ -7,8 +7,15 @@ The details of the model and checkpoints can be found [here](docs/MODEL_ZOO.md).
 
 The details for reproducing the datasets and evaluation in the paper can be found [here](docs/Datasets.md).
 
+## Updates
+
+- [05/06/2024] We made some updates to the implementation
+  - Added an evaluation script that reproduces the results in the PreFLMR paper
+  - Added an example script to fine-tune PreFLMR on a custom retrieval dataset
+
 ## Table of Contents
 - [FLMR](#flmr)
+  - [Updates](#updates)
   - [Table of Contents](#table-of-contents)
   - [How to use this package](#how-to-use-this-package)
     - [Environment](#environment)
@@ -269,7 +276,7 @@ We provide two scripts to show how the pretrained models can be used in evaluati
 2. `examples/example_use_preflmr.py`: an example script to evaluate PreFLMR on [E-VQA](https://github.com/google-research/google-research/tree/master/encyclopedic_vqa).
 
 ### Use FLMR
-```
+```bash
 cd examples/
 ```
 
@@ -277,7 +284,7 @@ Download `KBVQA_data` from [here](https://huggingface.co/datasets/BByrneLab/RAVQ
 
 Run the following command (remove `--run_indexing` if you have already run indexing once):
 
-```
+```bash
 python example_use_flmr.py \
             --use_gpu --run_indexing \
             --index_root_path "." \
@@ -296,16 +303,16 @@ python example_use_flmr.py \
             --num_ROIs 9 \
 ```
 
-### Use PreFLMR
+### Use PreFLMR (New Updates!)
 You can download the E-VQA images from https://github.com/google-research/google-research/tree/master/encyclopedic_vqa. We will add a dataset link here soon.
 
-```
+```bash
 cd examples/
 ```
 
 Run the following command (remove `--run_indexing` if you have already run indexing once):
 
-```
+```bash
 python example_use_preflmr.py \
             --use_gpu --run_indexing \
             --index_root_path "." \
@@ -317,14 +324,96 @@ python example_use_preflmr.py \
             --dataset EVQA \
             --use_split test \
             --nbits 8 \
-            --Ks 1 5 10 20 50 100 \
+            --Ks 1 5 10 20 50 100 500 \
             --checkpoint_path LinWeizheDragon/PreFLMR_ViT-G \
             --image_processor_name laion/CLIP-ViT-bigG-14-laion2B-39B-b160k \
-            --query_batch_size 8 
+            --query_batch_size 8 \
+            --compute_pseudo_recall \
 ```
 Here, we upload all the M2KR datasets into one HF dataset `BByrneLab/multi_task_multi_modal_knowledge_retrieval_benchmark_M2KR` with different datasets as subset.
-To reproduce results of the other datasets in the paper, you can change the `--dataset` to `OKVQA`, `KVQA`, `LLaVA`, `OVEN`, `Infoseek`, `WIT`, `IGLUE` and `E-VQA`.
+To reproduce results of the other datasets in the paper, you can change the `--dataset` to `OKVQA`, `KVQA`, `LLaVA`, `OVEN`, `Infoseek`, `WIT`, `IGLUE` and `EVQA`.
 
+**Updates**:
+
+- Enable `--compute_pseudo_recall` to compute pseudo recall for datasets like EVQA/OKVQA/Infoseek
+- Enable `--Ks 1 5 10 20 50 100 500`: max(Ks) needs to be 500 to match the performance reported in the PreFLMR paper.
+
+### [NEW!] Evaluate the PreFLMR models on all M2KR benchmarks
+
+Change the image root paths in `examples/evaluate_all.sh` and execute:
+
+```bash
+cd examples
+bash evaluate_all.sh
+```
+
+Obtain the report by:
+
+```bash
+python report.py
+```
+
+###  [NEW!] Finetune the PreFLMR model on downstream datasets
+
+#### Run finetuning
+```bash
+python example_finetune_preflmr.py \
+    --image_root_dir /path/to/EVQA/images/ \
+    --dataset_hf_path BByrneLab/multi_task_multi_modal_knowledge_retrieval_benchmark_M2KR \
+    --dataset EVQA \
+    --freeze_vit \
+    --log_with_wandb \
+    --model_save_path saved_models \
+    --checkpoint_path LinWeizheDragon/PreFLMR_ViT-G \
+    --image_processor_name laion/CLIP-ViT-bigG-14-laion2B-39B-b160k \
+    --batch_size 8 \
+    --accumulate_grad_batches 8 \
+    --valid_batch_size 16 \
+    --test_batch_size 64 \
+    --mode train \
+    --max_epochs 99999999 \
+    --learning_rate 0.000005 \
+    --warmup_steps 100 \
+    --accelerator auto \
+    --devices auto \
+    --strategy ddp_find_unused_parameters_true \
+    --num_sanity_val_steps 2 \
+    --precision bf16 \
+    --val_check_interval 2000 \
+    --save_top_k -1 \
+```
+#### Run Testing
+```bash
+python example_use_preflmr.py \
+    --use_gpu --run_indexing \
+    --index_root_path "." \
+    --index_name EVQA_PreFLMR_ViT-G_finetuned_model_step_10156 \
+    --experiment_name EVQA \
+    --indexing_batch_size 64 \
+    --image_root_dir /path/to/EVQA/images/ \
+    --dataset_hf_path BByrneLab/multi_task_multi_modal_knowledge_retrieval_benchmark_M2KR \
+    --dataset EVQA \
+    --use_split test \
+    --nbits 8 \
+    --num_gpus 1 \
+    --Ks 1 5 10 20 50 100 500 \
+    --checkpoint_path saved_models/model_step_10156 \
+    --image_processor_name laion/CLIP-ViT-bigG-14-laion2B-39B-b160k \
+    --query_batch_size 8 \
+```
+
+#### Example finetuning results
+
+By running the above script, we are able to obtain the following finetuning performance:
+
+| Step  | Pseudo Recall@5 on EVQA |
+|-------|-------------------------|
+| 2500  | 73.6                    |
+| 10000 | 73.55                   |
+| 12000 | 74.21                   |
+| 14000 | 73.73                   |
+
+(Checkpoints with low validation losses were picked and tested)
 
 ## Note
 The FLMR model is implemented following the documentation style of `transformers`. You can find detailed documentation in the modeling files. 
