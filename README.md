@@ -252,6 +252,8 @@ res = model.forward(**inputs)
 print(res)
 ```
 
+**Note** that the examples in this code block are only for demonstration purposes. They show that the pre-trained model gives higher scores to correct documents. In real training, you always need to pass in the documents in the order "positive doc for query1, negative doc1 for query1, negative doc2 for query1, ..., positive doc for query2, negative doc1 for query2, negative doc2 for query2, ...".  You may want to read the later section which provides an example finetuning script.
+
 ## Alternative: use transformers.AutoModel to load pre-trained models
 ```
 pip install transformers
@@ -419,6 +421,8 @@ By running the above script, we are able to obtain the following finetuning perf
 | 14000 | 73.73                   |
 
 (Checkpoints with low validation losses were picked and tested, run on 2 A100 GPUs)
+
+![Screenshot 2024-06-05 171340](https://github.com/LinWeizheDragon/FLMR/assets/33350454/13da0d3e-b0b7-45d2-9c61-466ea07c9032)
 
 ## Note
 The FLMR model is implemented following the documentation style of `transformers`. You can find detailed documentation in the modeling files. 
