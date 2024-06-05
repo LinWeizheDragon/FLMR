@@ -252,6 +252,8 @@ res = model.forward(**inputs)
 print(res)
 ```
 
+**Note** that the examples in this code block are only for demonstration purposes. They show that the pre-trained model gives higher scores to correct documents. In real training, you always need to pass in the documents in the order "positive doc for query1, negative doc1 for query1, negative doc2 for query1, ..., positive doc for query2, negative doc1 for query2, negative doc2 for query2, ...".  You may want to read the later section which provides an example finetuning script.
+
 ## Alternative: use transformers.AutoModel to load pre-trained models
 ```
 pip install transformers
