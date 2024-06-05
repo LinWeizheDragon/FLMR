@@ -25,7 +25,12 @@ The details for reproducing the datasets and evaluation in the paper can be foun
   - [Alternative: use transformers.AutoModel to load pre-trained models](#alternative-use-transformersautomodel-to-load-pre-trained-models)
   - [Use example scripts](#use-example-scripts)
     - [Use FLMR](#use-flmr)
-    - [Use PreFLMR](#use-preflmr)
+    - [\[NEW!\] Use PreFLMR](#new-use-preflmr)
+    - [\[NEW!\] Evaluate the PreFLMR models on all M2KR benchmarks](#new-evaluate-the-preflmr-models-on-all-m2kr-benchmarks)
+    - [\[NEW!\] Finetune the PreFLMR model on downstream datasets](#new-finetune-the-preflmr-model-on-downstream-datasets)
+      - [Run finetuning](#run-finetuning)
+      - [Run Testing](#run-testing)
+      - [Example finetuning results](#example-finetuning-results)
   - [Note](#note)
   - [Citation](#citation)
 
@@ -303,7 +308,7 @@ python example_use_flmr.py \
             --num_ROIs 9 \
 ```
 
-### Use PreFLMR (New Updates!)
+### [NEW!] Use PreFLMR
 You can download the E-VQA images from https://github.com/google-research/google-research/tree/master/encyclopedic_vqa. We will add a dataset link here soon.
 
 ```bash
@@ -413,7 +418,7 @@ By running the above script, we are able to obtain the following finetuning perf
 | 12000 | 74.21                   |
 | 14000 | 73.73                   |
 
-(Checkpoints with low validation losses were picked and tested)
+(Checkpoints with low validation losses were picked and tested, run on 2 A100 GPUs)
 
 ## Note
 The FLMR model is implemented following the documentation style of `transformers`. You can find detailed documentation in the modeling files. 
