@@ -41,6 +41,7 @@ def search_custom_collection(
         num_document_to_retrieve: int = 100,
         remove_zero_tensors: bool = True,
         centroid_search_batch_size: int = None,
+        **kwargs,
     ) -> Dict: 
 
         queries = Queries(data=queries)
@@ -52,6 +53,7 @@ def search_custom_collection(
             batch_size=centroid_search_batch_size,
             k=num_document_to_retrieve,
             remove_zero_tensors=remove_zero_tensors,  # For PreFLMR, this is needed
+            **kwargs, # other arguments
         )
 
         return search_results
