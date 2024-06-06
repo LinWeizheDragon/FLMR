@@ -5,7 +5,7 @@ For the huggingface implementation, we provide four pre-trained checkpoints of F
 
 # PreFLMR
 
-**Deprecation Note**: the results shown above are slightly affected by the conversion of checkpoints. Please see the most up-to-date benchmark results in the [main page](README.md)
+**Deprecation Note**: the results shown above are slightly affected by the conversion of checkpoints. Please see the most up-to-date benchmark results in the [main page](../README.md)
 
 PreFLMR is pretrained on WIT, CC3M, MSMARCO, KVQA, LLaVA, OVEN, OKVQA, Infoseek and E-VQA datasets. For details on the split for training and evaluation, hyperparameter used for training the PreFLMR models, please refer to the paper [PreFLMR: Scaling Up Fine-Grained Late-Interaction Multi-modal Retrievers](https://arxiv.org/abs/2402.08327). Here, we release three pre-trained checkpoints:
 
