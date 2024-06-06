@@ -1,12 +1,22 @@
 """
 This script is an example of how to use the pretrained FLMR model for retrieval.
-Author: Weizhe Lin
+Author: Weizhe Lin, Jingbiao Mei
 Date: 31/01/2024
 For more information, please refer to the official repository of FLMR:
 https://github.com/LinWeizheDragon/Retrieval-Augmented-Visual-Question-Answering
 """
 
+"""
+Date: 04/06/2024
+Comparing to V1, this version differs in the following aspects:
+1. Take the instruction from the HF dataset
+2. Save retrieval results to local files
+3. Report both Recall@K and PseudoRecall@K
+"""
+
+
 import os
+import json
 from collections import defaultdict
 
 import numpy as np
@@ -30,6 +40,20 @@ from flmr import (
 from flmr import index_custom_collection
 from flmr import create_searcher, search_custom_collection
 
+class NumpyEncoder(json.JSONEncoder):
+    """ Special json encoder for numpy types """
+    def default(self, obj):
+        if isinstance(obj, (np.int_, np.intc, np.intp, np.int8,
+                            np.int16, np.int32, np.int64, np.uint8,
+                            np.uint16, np.uint32, np.uint64)):
+            return int(obj)
+        elif isinstance(obj, (np.float_, np.float16, np.float32,
+                              np.float64)):
+            return float(obj)
+        elif isinstance(obj, (np.ndarray,)):
+            return obj.tolist()
+        return json.JSONEncoder.default(self, obj)
+
 
 def index_corpus(args, custom_collection):
     # Launch indexer
@@ -45,12 +69,12 @@ def index_corpus(args, custom_collection):
         use_gpu=args.use_gpu, # whether to enable GPU indexing
         indexing_batch_size=args.indexing_batch_size,
         model_temp_folder="tmp",
-        nranks=1, # number of GPUs used in indexing
+        nranks=args.num_gpus, # number of GPUs used in indexing
     )
     return index_path
 
 
-def query_index(args, ds, passage_contents, flmr_model: FLMRModelForRetrieval):
+def query_index(args, ds, passage_contents, passage_ids, flmr_model: FLMRModelForRetrieval):
     # Search documents
     # initiate a searcher
     searcher = create_searcher(
@@ -91,29 +115,62 @@ def query_index(args, ds, passage_contents, flmr_model: FLMRModelForRetrieval):
         ranking_dict = ranking.todict()
 
         # Process ranking data and obtain recall scores
+        # Psuedo Recall@K to be computed by matching the answer in the retrieved documents
+        # Positive ids Recall@K to be computed by matching the sample positive id with the retrieved documents ids
         recall_dict = defaultdict(list)
-        for question_id, answers in zip(batch["question_id"], batch["answers"]):
+        result_dict = defaultdict(list)
+        for i, (question_id, pos_ids) in enumerate(zip(batch["question_id"], batch["pos_item_ids"])):
             retrieved_docs = ranking_dict[question_id]
+            retrieved_doc_scores = [doc[2] for doc in retrieved_docs]
             retrieved_docs = [doc[0] for doc in retrieved_docs]
             retrieved_doc_texts = [passage_contents[doc_idx] for doc_idx in retrieved_docs]
+            retrieved_doc_ids = [passage_ids[doc_idx] for doc_idx in retrieved_docs]
+            retrieved_doc_list = [
+                {
+                    "passage_id": doc_id,
+                    "score": score,
+                } for doc_id, score in zip(retrieved_doc_ids, retrieved_doc_scores)
+            ]
+            result_dict["retrieved_passage"].append(retrieved_doc_list)
+            
+            if args.compute_pseudo_recall:
+                # Psuedo Recall@K
+                hit_list = []
+                # Get answers
+                answers = batch["answers"][i]
+                for retrieved_doc_text in retrieved_doc_texts:
+                    found = False
+                    for answer in answers:
+                        if answer.strip().lower() in retrieved_doc_text.lower():
+                            found = True
+                    if found:
+                        hit_list.append(1)
+                    else:
+                        hit_list.append(0)
+
+                # print(hit_list)
+                # input()
+                for K in Ks:
+                    recall = float(np.max(np.array(hit_list[:K])))
+                    recall_dict[f"Pseudo Recall@{K}"].append(recall)
+            
+            # Positive ids Recall@K    
+            retrieved_doc_ids = [passage_ids[doc_idx] for doc_idx in retrieved_docs] 
             hit_list = []
-            for retrieved_doc_text in retrieved_doc_texts:
+            for retrieved_doc_id in retrieved_doc_ids:
                 found = False
-                for answer in answers:
-                    if answer.strip().lower() in retrieved_doc_text.lower():
+                for pos_id in pos_ids:
+                    if pos_id == retrieved_doc_id:
                         found = True
                 if found:
                     hit_list.append(1)
                 else:
                     hit_list.append(0)
-
-            # print(hit_list)
-            # input()
             for K in Ks:
                 recall = float(np.max(np.array(hit_list[:K])))
                 recall_dict[f"Recall@{K}"].append(recall)
-
         batch.update(recall_dict)
+        batch.update(result_dict)
         return batch
 
     flmr_model = flmr_model.to("cuda")
@@ -133,17 +190,21 @@ def query_index(args, ds, passage_contents, flmr_model: FLMRModelForRetrieval):
 
 
 def main(args):
-    from datasets import load_dataset
-
-    ds = load_dataset(args.dataset_hf_path, args.dataset + "_data")
+    from datasets import load_dataset, load_from_disk
+    from datasets import DatasetDict
+    if args.local_data_hf == "":
+        ds = load_dataset(args.dataset_hf_path, args.dataset + "_data")
+    else:
+        ds = DatasetDict.load_from_disk(args.local_data_hf)
     passage_ds = load_dataset(args.dataset_hf_path, args.dataset + "_passages")
-
+    
     print("========= Loading dataset =========")
     print(ds)
     print(passage_ds)
 
     def add_path_prefix_in_img_path(example, prefix):
-        example["img_path"] = os.path.join(prefix, example["img_path"])
+        if example["img_path"] != None:
+            example["img_path"] = os.path.join(prefix, example["img_path"])
         return example
 
     ds = ds.map(add_path_prefix_in_img_path, fn_kwargs={"prefix": args.image_root_dir})
@@ -159,6 +220,7 @@ def main(args):
     print("========= Indexing =========")
     # Run indexing on passages
     passage_contents = passage_ds["passage_content"]
+    passage_ids = passage_ds["passage_id"]
     # passage_contents =['<BOK> ' + passage + ' <EOK>' for passage in passage_contents]
 
     if args.run_indexing:
@@ -181,19 +243,7 @@ def main(args):
     image_processor = AutoImageProcessor.from_pretrained(args.image_processor_name)
 
     print("========= Preparing query input =========")
-
-    instructions = [
-        "Using the provided image, obtain documents that address the subsequent question: ",
-        "Retrieve documents that provide an answer to the question alongside the image: ",
-        "Extract documents linked to the question provided in conjunction with the image: ",
-        "Utilizing the given image, obtain documents that respond to the following question: ",
-        "Using the given image, access documents that provide insights into the following question: ",
-        "Obtain documents that correspond to the inquiry alongside the provided image: ",
-        "With the provided image, gather documents that offer a solution to the question: ",
-        "Utilizing the given image, obtain documents that respond to the following question: ",
-    ]
-    import random
-
+    
     def prepare_inputs(sample):
         sample = EasyDict(sample)
 
@@ -201,9 +251,12 @@ def main(args):
             {"type": "QuestionInput", "option": "default", "separation_tokens": {"start": "", "end": ""}}
         )
 
-        random_instruction = random.choice(instructions)
+        instruction = sample.instruction.strip()
+        if instruction[-1] != ":":
+            instruction = instruction + ":"
+        #random_instruction = random.choice(instructions)
         text_sequence = " ".join(
-            [random_instruction]
+            [instruction]
             + [module.separation_tokens.start]
             + [sample.question]
             + [module.separation_tokens.end]
@@ -223,7 +276,12 @@ def main(args):
 
         pixel_values = []
         for img_path in examples["img_path"]:
-            image = Image.open(img_path).convert("RGB")
+
+            if img_path is None:
+                image = Image.new("RGB", (336, 336), color='black')
+            else:
+                image = Image.open(img_path).convert("RGB")
+            
             encoded = image_processor(image, return_tensors="pt")
             pixel_values.append(encoded.pixel_values)
 
@@ -241,18 +299,33 @@ def main(args):
     )
 
     print("========= Querying =========")
-    ds = query_index(args, ds, passage_contents, flmr_model)
+    ds = query_index(args, ds, passage_contents, passage_ids, flmr_model)
     # Compute final recall
     print("=============================")
     print("Inference summary:")
     print("=============================")
+    print(args.dataset, args.checkpoint_path)
     print(f"Total number of questions: {len(ds)}")
 
+    if args.compute_pseudo_recall:
+        for K in args.Ks:
+            recall = np.mean(np.array(ds[f"Pseudo Recall@{K}"]))
+            print(f"Pseudo Recall@{K}:\t", recall)
     for K in args.Ks:
         recall = np.mean(np.array(ds[f"Recall@{K}"]))
         print(f"Recall@{K}:\t", recall)
-
     print("=============================")
+    report_path = os.path.join(args.save_report_path, f"{args.dataset}_{args.index_name}.json")
+    print(f"Saving reports to {report_path}...")
+    
+    all_columns = ds.column_names
+    all_columns = [column for column in all_columns if ('Recall@' in column or column in ["question_id", "retrieved_passage"]) ]
+    ds_to_record = ds.select_columns(all_columns)
+    dict_to_record = ds_to_record.to_pandas().set_index("question_id").to_dict(orient="index")
+    with open(report_path, 'w') as f:
+        json.dump(
+            dict_to_record, f, indent=4, cls=NumpyEncoder
+        )
     print("Done! Program exiting...")
 
 
@@ -265,6 +338,7 @@ if __name__ == "__main__":
     # all hardcode parameters should be here
     parser.add_argument("--query_batch_size", type=int, default=8)
     parser.add_argument("--num_ROIs", type=int, default=9)
+    parser.add_argument("--num_gpus", type=int, default=1)
     parser.add_argument("--dataset_hf_path", type=str, default="")
     parser.add_argument(
         "--dataset", type=str, default="EVQA"
@@ -281,7 +355,9 @@ if __name__ == "__main__":
     parser.add_argument("--checkpoint_path", type=str, default="./converted_flmr")
     parser.add_argument("--run_indexing", action="store_true")
     parser.add_argument("--centroid_search_batch_size", type=int, default=None)
-
+    parser.add_argument("--save_report_path", type=str, default=".")
+    parser.add_argument("--compute_pseudo_recall", action="store_true")
+    parser.add_argument("--local_data_hf", type=str, default="")
     args = parser.parse_args()
     """
     Example usage:
@@ -296,9 +372,10 @@ if __name__ == "__main__":
             --dataset EVQA \
             --use_split test \
             --nbits 8 \
-            --Ks 1 5 10 20 50 100 \
+            --Ks 1 5 10 20 50 100 500 \
             --checkpoint_path LinWeizheDragon/PreFLMR_ViT-L \
             --image_processor_name openai/clip-vit-large-patch14 \
             --query_batch_size 8 \
+            --compute_pseudo_recall \
     """
     main(args)

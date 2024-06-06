@@ -3,13 +3,23 @@ The huggingface-transformers implementation of Fine-grained Late-interaction Mul
 
 The official implementation is at [here](https://github.com/LinWeizheDragon/Retrieval-Augmented-Visual-Question-Answering).
 
-The details of the model and checkpoints can be found [here](docs/MODEL_ZOO.md).
+The details of the model and checkpoints can be found [here](#models-and-benchmark-results).
 
 The details for reproducing the datasets and evaluation in the paper can be found [here](docs/Datasets.md).
 
+## Updates
+
+- [05/06/2024] 🔥🔥🔥We made some updates to the implementation
+  - Added an evaluation script that reproduces the results in the PreFLMR paper [here](#new-evaluate-the-preflmr-models-on-all-m2kr-benchmarks)
+  - Added the updated benchmark results with the transformer implementation [here](#models-and-benchmark-results)
+  - Added an example script to fine-tune PreFLMR on a custom retrieval dataset [here](#new-finetune-the-preflmr-model-on-downstream-datasets)
+  - **IMPORTANT**: fixed the OVEN data splits in the M2KR benchmark, and updated each entry with a fixed instruction to ensure the evaluation result is not affected by random sampling of instructions. Please delete your local cache and download the dataset again.
+
 ## Table of Contents
 - [FLMR](#flmr)
+  - [Updates](#updates)
   - [Table of Contents](#table-of-contents)
+  - [Models and Benchmark Results](#models-and-benchmark-results)
   - [How to use this package](#how-to-use-this-package)
     - [Environment](#environment)
     - [Index a custom document collection](#index-a-custom-document-collection)
@@ -18,10 +28,24 @@ The details for reproducing the datasets and evaluation in the paper can be foun
   - [Alternative: use transformers.AutoModel to load pre-trained models](#alternative-use-transformersautomodel-to-load-pre-trained-models)
   - [Use example scripts](#use-example-scripts)
     - [Use FLMR](#use-flmr)
-    - [Use PreFLMR](#use-preflmr)
+    - [\[NEW!\] Use PreFLMR](#new-use-preflmr)
+    - [\[NEW!\] Evaluate the PreFLMR models on all M2KR benchmarks](#new-evaluate-the-preflmr-models-on-all-m2kr-benchmarks)
+    - [\[NEW!\] Finetune the PreFLMR model on downstream datasets](#new-finetune-the-preflmr-model-on-downstream-datasets)
+      - [Run finetuning](#run-finetuning)
+      - [Run Testing](#run-testing)
+      - [Example finetuning results](#example-finetuning-results)
   - [Note](#note)
   - [Citation](#citation)
 
+## Models and Benchmark Results
+
+| Model         | WIT Recall@10 | IGLUE Recall@1 | KVQA Recall@5 | MSMARCO Recall@5 | OVEN Recall@5 | LLaVA Recall@1 | EVQA Recall@5 | EVQA Pseudo Recall@5 | OKVQA Recall@5 | OKVQA Pseudo Recall@5 | Infoseek Recall@5 | Infoseek Pseudo Recall@5 |
+|---------------|---------------|----------------|---------------|------------------|---------------|----------------|---------------|----------------------|----------------|-----------------------|-------------------|--------------------------|
+| [LinWeizheDragon/PreFLMR_ViT-G🤗](https://huggingface.co/LinWeizheDragon/PreFLMR_ViT-G) | 0.619         | 0.718          | 0.419         | 0.783            | 0.643         | 0.726          | 0.625         | 0.721                | 0.302          | 0.674                 | 0.392             | 0.577                    |
+| [LinWeizheDragon/PreFLMR_ViT-L🤗](https://huggingface.co/LinWeizheDragon/PreFLMR_ViT-L) | 0.605         | 0.699          | 0.440         | 0.779            | 0.608         | 0.729          | 0.609         | 0.708                | 0.314          | 0.690                 | 0.374             | 0.578                    |
+| [LinWeizheDragon/PreFLMR_ViT-B🤗](https://huggingface.co/LinWeizheDragon/PreFLMR_ViT-B) | 0.427         | 0.574          | 0.294         | 0.786            | 0.468         | 0.673          | 0.550         | 0.663                | 0.272          | 0.658                 | 0.260             | 0.496                    |
+
+**Note:** We converted the checkpoints from PyTorch to Huggingface-transformers, whose benchmark results differ from the numbers reported in the original paper slightly. You can reproduce the results in the above paper by referring to the instructions in [this document](docs/Datasets.md).
 
 ## How to use this package
 
@@ -240,6 +264,8 @@ res = model.forward(**inputs)
 print(res)
 ```
 
+**Note** that the examples in this code block are only for demonstration purposes. They show that the pre-trained model gives higher scores to correct documents. In real training, you always need to pass in the documents in the order "positive doc for query1, negative doc1 for query1, negative doc2 for query1, ..., positive doc for query2, negative doc1 for query2, negative doc2 for query2, ...".  You may want to read the later section which provides an example finetuning script.
+
 ## Alternative: use transformers.AutoModel to load pre-trained models
 ```
 pip install transformers
@@ -269,7 +295,7 @@ We provide two scripts to show how the pretrained models can be used in evaluati
 2. `examples/example_use_preflmr.py`: an example script to evaluate PreFLMR on [E-VQA](https://github.com/google-research/google-research/tree/master/encyclopedic_vqa).
 
 ### Use FLMR
-```
+```bash
 cd examples/
 ```
 
@@ -277,7 +303,7 @@ Download `KBVQA_data` from [here](https://huggingface.co/datasets/BByrneLab/RAVQ
 
 Run the following command (remove `--run_indexing` if you have already run indexing once):
 
-```
+```bash
 python example_use_flmr.py \
             --use_gpu --run_indexing \
             --index_root_path "." \
@@ -296,16 +322,16 @@ python example_use_flmr.py \
             --num_ROIs 9 \
 ```
 
-### Use PreFLMR
+### [NEW!] Use PreFLMR
 You can download the E-VQA images from https://github.com/google-research/google-research/tree/master/encyclopedic_vqa. We will add a dataset link here soon.
 
-```
+```bash
 cd examples/
 ```
 
 Run the following command (remove `--run_indexing` if you have already run indexing once):
 
-```
+```bash
 python example_use_preflmr.py \
             --use_gpu --run_indexing \
             --index_root_path "." \
@@ -317,14 +343,98 @@ python example_use_preflmr.py \
             --dataset EVQA \
             --use_split test \
             --nbits 8 \
-            --Ks 1 5 10 20 50 100 \
+            --Ks 1 5 10 20 50 100 500 \
             --checkpoint_path LinWeizheDragon/PreFLMR_ViT-G \
             --image_processor_name laion/CLIP-ViT-bigG-14-laion2B-39B-b160k \
-            --query_batch_size 8 
+            --query_batch_size 8 \
+            --compute_pseudo_recall \
 ```
 Here, we upload all the M2KR datasets into one HF dataset `BByrneLab/multi_task_multi_modal_knowledge_retrieval_benchmark_M2KR` with different datasets as subset.
-To reproduce results of the other datasets in the paper, you can change the `--dataset` to `OKVQA`, `KVQA`, `LLaVA`, `OVEN`, `Infoseek`, `WIT`, `IGLUE` and `E-VQA`.
+To reproduce results of the other datasets in the paper, you can change the `--dataset` to `OKVQA`, `KVQA`, `LLaVA`, `OVEN`, `Infoseek`, `WIT`, `IGLUE` and `EVQA`.
 
+**Updates**:
+
+- Enable `--compute_pseudo_recall` to compute pseudo recall for datasets like EVQA/OKVQA/Infoseek
+- Enable `--Ks 1 5 10 20 50 100 500`: max(Ks) needs to be 500 to match the performance reported in the PreFLMR paper.
+
+### [NEW!] Evaluate the PreFLMR models on all M2KR benchmarks
+
+Change the image root paths in `examples/evaluate_all.sh` and execute:
+
+```bash
+cd examples
+bash evaluate_all.sh
+```
+
+Obtain the report by:
+
+```bash
+python report.py
+```
+
+###  [NEW!] Finetune the PreFLMR model on downstream datasets
+
+#### Run finetuning
+```bash
+python example_finetune_preflmr.py \
+    --image_root_dir /path/to/EVQA/images/ \
+    --dataset_hf_path BByrneLab/multi_task_multi_modal_knowledge_retrieval_benchmark_M2KR \
+    --dataset EVQA \
+    --freeze_vit \
+    --log_with_wandb \
+    --model_save_path saved_models \
+    --checkpoint_path LinWeizheDragon/PreFLMR_ViT-G \
+    --image_processor_name laion/CLIP-ViT-bigG-14-laion2B-39B-b160k \
+    --batch_size 8 \
+    --accumulate_grad_batches 8 \
+    --valid_batch_size 16 \
+    --test_batch_size 64 \
+    --mode train \
+    --max_epochs 99999999 \
+    --learning_rate 0.000005 \
+    --warmup_steps 100 \
+    --accelerator auto \
+    --devices auto \
+    --strategy ddp_find_unused_parameters_true \
+    --num_sanity_val_steps 2 \
+    --precision bf16 \
+    --val_check_interval 2000 \
+    --save_top_k -1 \
+```
+#### Run Testing
+```bash
+python example_use_preflmr.py \
+    --use_gpu --run_indexing \
+    --index_root_path "." \
+    --index_name EVQA_PreFLMR_ViT-G_finetuned_model_step_10156 \
+    --experiment_name EVQA \
+    --indexing_batch_size 64 \
+    --image_root_dir /path/to/EVQA/images/ \
+    --dataset_hf_path BByrneLab/multi_task_multi_modal_knowledge_retrieval_benchmark_M2KR \
+    --dataset EVQA \
+    --use_split test \
+    --nbits 8 \
+    --num_gpus 1 \
+    --Ks 1 5 10 20 50 100 500 \
+    --checkpoint_path saved_models/model_step_10156 \
+    --image_processor_name laion/CLIP-ViT-bigG-14-laion2B-39B-b160k \
+    --query_batch_size 8 \
+```
+
+#### Example finetuning results
+
+By running the above script, we are able to obtain the following finetuning performance:
+
+| Step  | Pseudo Recall@5 on EVQA |
+|-------|-------------------------|
+| 2500  | 73.6                    |
+| 10000 | 73.55                   |
+| 12000 | 74.21                   |
+| 14000 | 73.73                   |
+
+(Checkpoints with low validation losses were picked and tested, run on 2 A100 GPUs)
+
+![Screenshot 2024-06-05 171340](https://github.com/LinWeizheDragon/FLMR/assets/33350454/13da0d3e-b0b7-45d2-9c61-466ea07c9032)
 
 ## Note
 The FLMR model is implemented following the documentation style of `transformers`. You can find detailed documentation in the modeling files. 

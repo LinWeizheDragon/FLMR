@@ -308,4 +308,5 @@ def colbert_score_packed(Q, D_packed, D_lengths, config=ColBERTConfig()):
 
         return colbert_score_reduce(scores_padded, scores_mask, config)
     else:
-        return ColBERT.segmented_maxsim(scores, D_lengths)
+        from flmr import FLMRModelForRetrieval
+        return FLMRModelForRetrieval.segmented_maxsim(scores, D_lengths)

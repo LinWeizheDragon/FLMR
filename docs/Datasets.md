@@ -260,6 +260,8 @@ You may expect the following structure after unzipping the downloaded images:
 
 ## Reproduce PreFLMR results
 To reproduce the PreFLMR results, you can use the M2KR HF datasets and the PreFLMR models. You will need to change the `image_root_dir` to the correct path to the image directory.
+
+### Evaluate the PreFLMR models on a single dataset
 ```bash
 python example_use_preflmr.py \
             --use_gpu --run_indexing \
@@ -272,10 +274,32 @@ python example_use_preflmr.py \
             --dataset EVQA \
             --use_split test \
             --nbits 8 \
-            --Ks 1 5 10 20 50 100 \
+            --Ks 1 5 10 20 50 100 500 \
             --checkpoint_path LinWeizheDragon/PreFLMR_ViT-G \
             --image_processor_name laion/CLIP-ViT-bigG-14-laion2B-39B-b160k \
-            --query_batch_size 8 
+            --query_batch_size 8 \
+            --compute_pseudo_recall \
 ```
 By changing the `--dataset`, `--experiment_name` and `image_root_dir`, you can reproduce the results for different datasets in the PreFLMR paper.
 
+### Evaluate the PreFLMR models on all M2KR benchmarks
+
+Change the image root paths in `examples/evaluate_all.sh` and execute:
+
+```bash
+cd examples
+bash evaluate_all.sh
+```
+
+Obtain the report by:
+
+```bash
+python report.py
+```
+
+Ideally, you will obtain the following report:
+| Model         | WIT Recall@10 | IGLUE Recall@1 | KVQA Recall@5 | MSMARCO Recall@5 | OVEN Recall@5 | LLaVA Recall@1 | EVQA Recall@5 | EVQA Pseudo Recall@5 | OKVQA Recall@5 | OKVQA Pseudo Recall@5 | Infoseek Recall@5 | Infoseek Pseudo Recall@5 |
+|---------------|---------------|----------------|---------------|------------------|---------------|----------------|---------------|----------------------|----------------|-----------------------|-------------------|--------------------------|
+| PreFLMR_ViT-G | 0.619         | 0.718          | 0.419         | 0.783            | 0.643         | 0.726          | 0.625         | 0.721                | 0.302          | 0.674                 | 0.392             | 0.577                    |
+| PreFLMR_ViT-L | 0.605         | 0.699          | 0.440         | 0.779            | 0.608         | 0.729          | 0.609         | 0.708                | 0.314          | 0.690                 | 0.374             | 0.578                    |
+| PreFLMR_ViT-B | 0.427         | 0.574          | 0.294         | 0.786            | 0.468         | 0.673          | 0.550         | 0.663                | 0.272          | 0.658                 | 0.260             | 0.496                    |
