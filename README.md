@@ -3,7 +3,7 @@ The huggingface-transformers implementation of Fine-grained Late-interaction Mul
 
 The official implementation is at [here](https://github.com/LinWeizheDragon/Retrieval-Augmented-Visual-Question-Answering).
 
-The details of the model and checkpoints can be found [here](docs/MODEL_ZOO.md).
+The details of the model and checkpoints can be found [here](#models-and-benchmark-results).
 
 The details for reproducing the datasets and evaluation in the paper can be found [here](docs/Datasets.md).
 
@@ -12,11 +12,13 @@ The details for reproducing the datasets and evaluation in the paper can be foun
 - [05/06/2024] We made some updates to the implementation
   - Added an evaluation script that reproduces the results in the PreFLMR paper
   - Added an example script to fine-tune PreFLMR on a custom retrieval dataset
+  - **IMPORTANT**: fixed the OVEN data splits in the M2KR benchmark, and updated each entry with a fixed instruction to ensure the evaluation result is not affected by random sampling of instructions.
 
 ## Table of Contents
 - [FLMR](#flmr)
   - [Updates](#updates)
   - [Table of Contents](#table-of-contents)
+  - [Models and Benchmark Results](#models-and-benchmark-results)
   - [How to use this package](#how-to-use-this-package)
     - [Environment](#environment)
     - [Index a custom document collection](#index-a-custom-document-collection)
@@ -34,6 +36,15 @@ The details for reproducing the datasets and evaluation in the paper can be foun
   - [Note](#note)
   - [Citation](#citation)
 
+## Models and Benchmark Results
+
+| Model         | WIT Recall@10 | IGLUE Recall@1 | KVQA Recall@5 | MSMARCO Recall@5 | OVEN Recall@5 | LLaVA Recall@1 | EVQA Recall@5 | EVQA Pseudo Recall@5 | OKVQA Recall@5 | OKVQA Pseudo Recall@5 | Infoseek Recall@5 | Infoseek Pseudo Recall@5 |
+|---------------|---------------|----------------|---------------|------------------|---------------|----------------|---------------|----------------------|----------------|-----------------------|-------------------|--------------------------|
+| [LinWeizheDragon/PreFLMR_ViT-G🤗](https://huggingface.co/LinWeizheDragon/PreFLMR_ViT-G) | 0.619         | 0.718          | 0.419         | 0.783            | 0.643         | 0.726          | 0.625         | 0.721                | 0.302          | 0.674                 | 0.392             | 0.577                    |
+| [LinWeizheDragon/PreFLMR_ViT-L🤗](https://huggingface.co/LinWeizheDragon/PreFLMR_ViT-L) | 0.605         | 0.699          | 0.440         | 0.779            | 0.608         | 0.729          | 0.609         | 0.708                | 0.314          | 0.690                 | 0.374             | 0.578                    |
+| [LinWeizheDragon/PreFLMR_ViT-B🤗](https://huggingface.co/LinWeizheDragon/PreFLMR_ViT-B) | 0.427         | 0.574          | 0.294         | 0.786            | 0.468         | 0.673          | 0.550         | 0.663                | 0.272          | 0.658                 | 0.260             | 0.496                    |
+
+**Note:** We converted the checkpoints from PyTorch to Huggingface-transformers, whose benchmark results differ from the numbers reported in the original paper slightly. You can reproduce the results in the above paper by referring to the instructions in [this document](docs/Datasets.md).
 
 ## How to use this package
 
