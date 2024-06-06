@@ -374,6 +374,12 @@ python report.py
 
 ###  [NEW!] Finetune the PreFLMR model on downstream datasets
 
+You will need to install pytorch-lightning:
+
+```
+pip install pytorch-lightning==2.1.0
+```
+
 #### Run finetuning
 ```bash
 python example_finetune_preflmr.py \
