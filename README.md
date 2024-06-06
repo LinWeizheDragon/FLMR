@@ -10,9 +10,9 @@ The details for reproducing the datasets and evaluation in the paper can be foun
 ## Updates
 
 - [05/06/2024] We made some updates to the implementation
-  - Added an evaluation script that reproduces the results in the PreFLMR paper
-  - Added an example script to fine-tune PreFLMR on a custom retrieval dataset
-  - **IMPORTANT**: fixed the OVEN data splits in the M2KR benchmark, and updated each entry with a fixed instruction to ensure the evaluation result is not affected by random sampling of instructions.
+  - Added an evaluation script that reproduces the results in the PreFLMR paper [here](#new-evaluate-the-preflmr-models-on-all-m2kr-benchmarks)
+  - Added an example script to fine-tune PreFLMR on a custom retrieval dataset [here](#new-finetune-the-preflmr-model-on-downstream-datasets)
+  - **IMPORTANT**: fixed the OVEN data splits in the M2KR benchmark, and updated each entry with a fixed instruction to ensure the evaluation result is not affected by random sampling of instructions. Please delete your local cache and download the dataset again.
 
 ## Table of Contents
 - [FLMR](#flmr)
