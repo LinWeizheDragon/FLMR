@@ -170,6 +170,8 @@ In general, the image path structure should be `<image_root_dir>/<img_path>`, wh
 ├── image_root_dir
 │   ├── ...
 ```
+We release the raw images used in M2KR benchmark, please see the [M2kR Benchmark Images](https://huggingface.co/datasets/BByrneLab/M2KR_Images)
+
 ### WIT 
 The WIT dataset images can be downloaded with the instruction from the [WIT Github page](https://github.com/google-research-datasets/wit/blob/main/DATA.md). The training images can be downloaded from [Kaggle](https://www.kaggle.com/competitions/wikipedia-image-caption/data) at a size around 275 GB. The validation and test images can be downloaded directly from the github page. 
 
