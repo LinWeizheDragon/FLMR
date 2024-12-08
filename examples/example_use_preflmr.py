@@ -36,6 +36,7 @@ from flmr import (
     FLMRModelForRetrieval,
     FLMRQueryEncoderTokenizer,
     FLMRContextEncoderTokenizer,
+    FLMRConfig,
 )
 from flmr import index_custom_collection
 from flmr import create_searcher, search_custom_collection
@@ -230,10 +231,13 @@ def main(args):
         print("args.run_indexing is False, skipping indexing...")
 
     print("========= Loading pretrained model =========")
-    query_tokenizer = FLMRQueryEncoderTokenizer.from_pretrained(args.checkpoint_path, subfolder="query_tokenizer")
-    context_tokenizer = FLMRContextEncoderTokenizer.from_pretrained(
-        args.checkpoint_path, subfolder="context_tokenizer"
-    )
+    flmr_config = FLMRConfig.from_pretrained(args.checkpoint_path)
+    query_tokenizer = FLMRQueryEncoderTokenizer.from_pretrained(args.checkpoint_path,
+                                                                    init_text_encoder_from_bert=flmr_config.init_text_encoder_from_bert,
+                                                                    subfolder="query_tokenizer")
+    context_tokenizer = FLMRContextEncoderTokenizer.from_pretrained(args.checkpoint_path,
+                                                                    init_text_encoder_from_bert=flmr_config.init_text_encoder_from_bert,
+                                                                    subfolder="context_tokenizer")
 
     flmr_model = FLMRModelForRetrieval.from_pretrained(
         args.checkpoint_path,

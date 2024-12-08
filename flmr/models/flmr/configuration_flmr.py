@@ -297,6 +297,12 @@ class FLMRConfig(PretrainedConfig):
         vision_model_version (`str`, *optional*, defaults to `"openai/clip-vit-base-patch32"`):
             The version of the vision model being used in this FLMR model.
             This option is used in performing retrieval only. Though it does not affect the model architecture, it is highly recommended to set this argument so that it properly reflects the version of the vision model being used in the FLMR model. This arugment will be saved in the model configuration, and it can be read by the indexing engine. The indexing engine will use this argument to initialize an image processor, which can process the input image files. Find more details under `examples/research_projects/flmr-retrieval`.
+        init_text_encoder_from_bert (`bool`, *optional*, defaults to `True`):
+            Whether use text_encoder with bert. Set this to `False` if you want to use other text_encoder instead of `bert-base-uncased`.
+        new_text_encoder_model_name_or_path (`str`, *optional*, defaults to `"BAAI/bge-m3"`):
+            The model instaed of `bert-base-uncased`. Set init_text_encoder_from_bert to `False` to enable this.
+        query_mask_input_ids_skip_list (`List`, *optional*, defaults to `[]`):
+            The input_ids need to skip when executing query_mask.
 
     Example:
 
@@ -337,6 +343,9 @@ class FLMRConfig(PretrainedConfig):
         mask_instruction_token: str = None,
         transformer_mapping_cross_attention_length: int = 32,
         vision_model_version: str = "openai/clip-vit-base-patch32",
+        init_text_encoder_from_bert: bool = True,
+        new_text_encoder_model_name_or_path: str = "BAAI/bge-m3",
+        query_mask_input_ids_skip_list: list = [],
         **kwargs,
     ):
         super().__init__(**kwargs)
@@ -371,6 +380,9 @@ class FLMRConfig(PretrainedConfig):
         self.mask_instruction_token = mask_instruction_token
         self.transformer_mapping_cross_attention_length = transformer_mapping_cross_attention_length
         self.vision_model_version = vision_model_version
+        self.init_text_encoder_from_bert = init_text_encoder_from_bert
+        self.new_text_encoder_model_name_or_path = new_text_encoder_model_name_or_path
+        self.query_mask_input_ids_skip_list = query_mask_input_ids_skip_list
 
     @classmethod
     def from_text_vision_configs(cls, text_config: FLMRTextConfig, vision_config: FLMRVisionConfig, **kwargs):
