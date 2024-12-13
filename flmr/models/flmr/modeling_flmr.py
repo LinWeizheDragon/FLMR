@@ -27,6 +27,7 @@ import torch.distributed as dist
 from torch import Tensor, nn
 from torch.utils.cpp_extension import load
 
+from transformers import AutoModel, AutoConfig
 from transformers.modeling_outputs import BaseModelOutputWithPooling
 from transformers.modeling_utils import PreTrainedModel
 from transformers.utils import (
@@ -1103,7 +1104,7 @@ class FLMRModelForRetrieval(FLMRPretrainedModelForRetrieval):
             text_encoder_outputs = self.query_text_encoder(input_ids, attention_mask=attention_mask)
             text_encoder_hidden_states = text_encoder_outputs[0]
             text_embeddings = self.query_text_encoder_linear(text_encoder_hidden_states)
-            mask = torch.tensor(self.query_mask(input_ids, skiplist=[]), device=self.device).unsqueeze(2).float()
+            mask = torch.tensor(self.query_mask(input_ids, skiplist=self.config.query_mask_input_ids_skip_list), device=self.device).unsqueeze(2).float()
 
             text_embeddings = text_embeddings * mask
 
@@ -1139,6 +1140,8 @@ class FLMRModelForRetrieval(FLMRPretrainedModelForRetrieval):
 
                 # Cross attention only attends to the first 32 tokens
                 encoder_mask = torch.ones_like(mask).to(mask.device, dtype=mask.dtype)
+                if len(self.config.query_mask_input_ids_skip_list) > 0:
+                    encoder_mask[torch.isin(input_ids, torch.tensor(self.config.query_mask_input_ids_skip_list))] = 0
                 cross_attention_length = self.config.transformer_mapping_cross_attention_length
                 if text_encoder_hidden_states.shape[1] > cross_attention_length:
                     text_encoder_hidden_states = text_encoder_hidden_states[:, :cross_attention_length]
@@ -1393,12 +1396,15 @@ class FLMRModelForRetrieval(FLMRPretrainedModelForRetrieval):
     FLMR_TEXT_ENCODERS_START_DOCSTRING,
 )
 class FLMRTextModel(FLMRPreTrainedModel):
-    base_model_prefix = "bert_model"
+    base_model_prefix = "flmr_text_model"
     config_class = FLMRTextConfig
 
     def __init__(self, config: FLMRTextConfig, *args, **kwargs):
         super().__init__(config)
-        self.bert_model = BertModel(config, add_pooling_layer=True)
+        if config.text_encoder_base_model == "bert-base-uncased":
+            self.bert_model = BertModel(config, add_pooling_layer=True)
+        else:
+            self.bert_model = AutoModel.from_pretrained(config.text_encoder_base_model, *args, **kwargs)
         if self.bert_model.config.hidden_size <= 0:
             raise ValueError("Encoder hidden_size can't be zero")
         self.projection_dim = config.projection_dim
@@ -1406,6 +1412,7 @@ class FLMRTextModel(FLMRPreTrainedModel):
             self.encode_proj = nn.Linear(self.bert_model.config.hidden_size, config.projection_dim)
         # Initialize weights and apply final processing
         self.post_init()
+        self.text_model = self.bert_model
 
     @add_start_docstrings_to_model_forward(FLMR_TEXT_ENCODERS_INPUTS_DOCSTRING)
     @replace_return_docstrings(output_type=BaseModelOutputWithPooling, config_class=FLMRTextConfig)
@@ -1429,7 +1436,7 @@ class FLMRTextModel(FLMRPreTrainedModel):
         )
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 
-        outputs = self.bert_model(
+        outputs = self.text_model(
             input_ids=input_ids,
             attention_mask=attention_mask,
             token_type_ids=token_type_ids,
@@ -1458,7 +1465,7 @@ class FLMRTextModel(FLMRPreTrainedModel):
     def embeddings_size(self) -> int:
         if self.projection_dim > 0:
             return self.encode_proj.out_features
-        return self.bert_model.config.hidden_size
+        return self.text_model.config.hidden_size
 
 
 @add_start_docstrings(

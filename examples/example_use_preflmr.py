@@ -36,6 +36,7 @@ from flmr import (
     FLMRModelForRetrieval,
     FLMRQueryEncoderTokenizer,
     FLMRContextEncoderTokenizer,
+    FLMRConfig,
 )
 from flmr import index_custom_collection
 from flmr import create_searcher, search_custom_collection
@@ -196,7 +197,10 @@ def main(args):
         ds = load_dataset(args.dataset_hf_path, args.dataset + "_data")
     else:
         ds = DatasetDict.load_from_disk(args.local_data_hf)
-    passage_ds = load_dataset(args.dataset_hf_path, args.dataset + "_passages")
+    if args.local_passages_hf == "":
+        passage_ds = load_dataset(args.dataset_hf_path, args.dataset + "_passages")
+    else:
+        passage_ds = DatasetDict.load_from_disk(args.local_passages_hf)
     
     print("========= Loading dataset =========")
     print(ds)
@@ -230,10 +234,13 @@ def main(args):
         print("args.run_indexing is False, skipping indexing...")
 
     print("========= Loading pretrained model =========")
-    query_tokenizer = FLMRQueryEncoderTokenizer.from_pretrained(args.checkpoint_path, subfolder="query_tokenizer")
-    context_tokenizer = FLMRContextEncoderTokenizer.from_pretrained(
-        args.checkpoint_path, subfolder="context_tokenizer"
-    )
+    flmr_config = FLMRConfig.from_pretrained(args.checkpoint_path)
+    query_tokenizer = FLMRQueryEncoderTokenizer.from_pretrained(args.checkpoint_path,
+                                                                    text_config=flmr_config.text_config,
+                                                                    subfolder="query_tokenizer")
+    context_tokenizer = FLMRContextEncoderTokenizer.from_pretrained(args.checkpoint_path,
+                                                                    text_config=flmr_config.text_config,
+                                                                    subfolder="context_tokenizer")
 
     flmr_model = FLMRModelForRetrieval.from_pretrained(
         args.checkpoint_path,
@@ -254,6 +261,7 @@ def main(args):
         instruction = sample.instruction.strip()
         if instruction[-1] != ":":
             instruction = instruction + ":"
+        instruction = instruction.replace(":", flmr_config.mask_instruction_token)
         #random_instruction = random.choice(instructions)
         text_sequence = " ".join(
             [instruction]
@@ -358,6 +366,7 @@ if __name__ == "__main__":
     parser.add_argument("--save_report_path", type=str, default=".")
     parser.add_argument("--compute_pseudo_recall", action="store_true")
     parser.add_argument("--local_data_hf", type=str, default="")
+    parser.add_argument("--local_passages_hf", type=str, default="")
     args = parser.parse_args()
     """
     Example usage:
