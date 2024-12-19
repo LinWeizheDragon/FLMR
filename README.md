@@ -8,7 +8,8 @@ The details of the model and checkpoints can be found [here](#models-and-benchma
 The details for reproducing the datasets and evaluation in the paper can be found [here](docs/Datasets.md).
 
 ## Updates
-
+- [03/09/2024] We have uploaded the images used in the M2KR benchmark [here](https://huggingface.co/datasets/BByrneLab/M2KR_Images) .
+- [10/08/2024] We received many requests regarding adding multilingual abilities to PreFLMR. We announce that **we are now training the Chinese version of PreFLMR and will release it very soon**. Stay tuned!
 - [05/06/2024] 🔥🔥🔥We made some updates to the implementation
   - Added an evaluation script that reproduces the results in the PreFLMR paper [here](#new-evaluate-the-preflmr-models-on-all-m2kr-benchmarks)
   - Added the updated benchmark results with the transformer implementation [here](#models-and-benchmark-results)
@@ -458,13 +459,24 @@ If our work helped your research, please kindly cite our paper for FLMR and PreF
     url={https://openreview.net/forum?id=IWWWulAX7g}
         }
         
-@article{Lin_Mei_Chen_Byrne_2024, 
-        title={PreFLMR: Scaling Up Fine-Grained Late-Interaction Multi-modal Retrievers}, 
-        url={http://arxiv.org/abs/2402.08327}, 
-        number={arXiv:2402.08327}, 
-        publisher={arXiv}, 
-        author={Lin, Weizhe and Mei, Jingbiao and Chen, Jinghong and Byrne, Bill}, 
-        year={2024}}
+@inproceedings{lin-etal-2024-preflmr,
+    title = "{P}re{FLMR}: Scaling Up Fine-Grained Late-Interaction Multi-modal Retrievers",
+    author = "Lin, Weizhe  and
+      Mei, Jingbiao  and
+      Chen, Jinghong  and
+      Byrne, Bill",
+    editor = "Ku, Lun-Wei  and
+      Martins, Andre  and
+      Srikumar, Vivek",
+    booktitle = "Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)",
+    month = aug,
+    year = "2024",
+    address = "Bangkok, Thailand",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2024.acl-long.289",
+    pages = "5294--5316",
+    abstract = "Large Multimodal Models (LMMs) excel in natural language and visual understanding but are challenged by exacting tasks such as Knowledge-based Visual Question Answering (KB-VQA) which involve the retrieval of relevant information from document collections to use in shaping answers to questions. We present an extensive training and evaluation framework, M2KR, for KB-VQA. M2KR contains a collection of vision and language tasks which we have incorporated into a single suite of benchmark tasks for training and evaluating general-purpose multi-modal retrievers. We use M2KR to develop PreFLMR, a pre-trained version of the recently developed Fine-grained Late-interaction Multi-modal Retriever (FLMR) approach to KB-VQA, and we report new state-of-the-art results across a range of tasks. We also present investigations into the scaling behaviors of PreFLMR intended to be useful in future developments in general-purpose multi-modal retrievers.",
+}
 
 ```
 
