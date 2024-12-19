@@ -50,11 +50,11 @@ The details for reproducing the datasets and evaluation in the paper can be foun
 
 **Note:** We converted the checkpoints from PyTorch to Huggingface-transformers, whose benchmark results differ from the numbers reported in the original paper slightly. You can reproduce the results in the above paper by referring to the instructions in [this document](docs/Datasets.md).
 
-## Models and Benchmark Results for the M2KR Amd M2KR-CN (the Chinese split of the M2KR)
+## Models and Benchmark Results for the M2KR and M2KR-CN (the Chinese split of the M2KR)
 |                            Model                             | WIT(EN) Recall@10 | WIT(CN) Recall@10 | KVQA(EN) Recall@5 | KVQA(EN) Recall@5 | MSMARCO(EN) Recall@5 | MSMARCO(CN) Recall@5 | OVEN(EN) Recall@5 | OVEN(CN) Recall@5 | LLaVA(EN) Recall@1 | LLaVA(CN) Recall@1 | EVQA(EN) Recall@5 | EVQA(CN) Recall@5 | OKVQA(EN) Recall@5 | OKVQA(CN) Recall@5 | Infoseek(EN) Recall@5 | Infoseek(CN) Recall@5 |
 | :----------------------------------------------------------: | :---------------: | :---------------: | :---------------: | :---------------: | :------------------: | :------------------: | :---------------: | :---------------: | :----------------: | :----------------: | :---------------: | :---------------: | :----------------: | :----------------: | :-------------------: | :-------------------: |
 | [LinWeizheDragon/PreFLMR_ViT-L🤗](https://huggingface.co/LinWeizheDragon/PreFLMR_ViT-L) |       60.5        |       10.9        |       43.6        |        3.2        |         78.7         |         10.3         |       59.8        |        6.6        |        71.8        |        3.2         |       70.8        |        2.8        |        68.5        |        2.1         |         57.9          |          7.9          |
-| [LinWeizheDragon/PreFLMR_ViT-L_ENCN🤗](https://huggingface.co/LinWeizheDragon/PreFLMR_ViT-L_ENCN) |       60.8        |       83.4        |       41.05       |       37.27       |         82.6         |        82.33         |       60.8        |       58.83       |       71.11        |       58.93        |       57.97       |       46.64       |       13.87        |       13.32        |         41.91         |         39.70         |
+| [LinWeizheDragon/PreFLMR_ViT-L_ENCN🤗](https://huggingface.co/LinWeizheDragon/PreFLMR_ViT-L_ENCN) |       60.8        |       83.4        |       41.1       |       37.3       |         82.6         |        82.3         |       60.8        |       58.8       |       71.1        |       58.9        |       58. 0       |       46.6       |       13.9        |       13.3        |         41.9         |         39.7         |
 
 ## How to use this package
 
