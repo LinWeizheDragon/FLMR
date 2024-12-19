@@ -191,6 +191,10 @@ class FLMRTextConfig(PretrainedConfig):
         projection_dim (`int`, *optional*, defaults to 0):
             Dimension of the projection for the context and question encoders. If it is set to zero (default), then no
             projection is done.
+        text_encoder_base_model (`str`, *optional*, defaults to `"bert-base-uncased"`):
+            The text_encoder flmr based on.
+        query_maxlen (`int`, *optional*, defaults to 32)
+            The max_length for query tokenizer encoding.
 
     Example:
 
@@ -226,6 +230,8 @@ class FLMRTextConfig(PretrainedConfig):
         pad_token_id=0,
         position_embedding_type="absolute",
         projection_dim: int = 0,
+        text_encoder_base_model="bert-base-uncased",
+        query_maxlen: int = 32,
         **kwargs,
     ):
         super().__init__(pad_token_id=pad_token_id, **kwargs)
@@ -243,7 +249,9 @@ class FLMRTextConfig(PretrainedConfig):
         self.initializer_range = initializer_range
         self.layer_norm_eps = layer_norm_eps
         self.projection_dim = projection_dim
+        self.text_encoder_base_model = text_encoder_base_model
         self.position_embedding_type = position_embedding_type
+        self.query_maxlen = query_maxlen
 
 
 class FLMRConfig(PretrainedConfig):
@@ -297,6 +305,8 @@ class FLMRConfig(PretrainedConfig):
         vision_model_version (`str`, *optional*, defaults to `"openai/clip-vit-base-patch32"`):
             The version of the vision model being used in this FLMR model.
             This option is used in performing retrieval only. Though it does not affect the model architecture, it is highly recommended to set this argument so that it properly reflects the version of the vision model being used in the FLMR model. This arugment will be saved in the model configuration, and it can be read by the indexing engine. The indexing engine will use this argument to initialize an image processor, which can process the input image files. Find more details under `examples/research_projects/flmr-retrieval`.
+        query_mask_input_ids_skip_list (`List`, *optional*, defaults to `[]`):
+            The input_ids need to skip when execute query_mask.
 
     Example:
 
@@ -337,6 +347,7 @@ class FLMRConfig(PretrainedConfig):
         mask_instruction_token: str = None,
         transformer_mapping_cross_attention_length: int = 32,
         vision_model_version: str = "openai/clip-vit-base-patch32",
+        query_mask_input_ids_skip_list: list = [],
         **kwargs,
     ):
         super().__init__(**kwargs)
@@ -371,6 +382,7 @@ class FLMRConfig(PretrainedConfig):
         self.mask_instruction_token = mask_instruction_token
         self.transformer_mapping_cross_attention_length = transformer_mapping_cross_attention_length
         self.vision_model_version = vision_model_version
+        self.query_mask_input_ids_skip_list = query_mask_input_ids_skip_list
 
     @classmethod
     def from_text_vision_configs(cls, text_config: FLMRTextConfig, vision_config: FLMRVisionConfig, **kwargs):

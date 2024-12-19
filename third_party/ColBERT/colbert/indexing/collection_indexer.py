@@ -42,10 +42,16 @@ class CollectionIndexer():
         #     self.config.help()
 
         self.collection = Collection.cast(collection)
-        # self.checkpoint = Checkpoint(self.config.checkpoint, colbert_config=self.config)
-        from flmr import FLMRModelForIndexing, FLMRQueryEncoderTokenizer, FLMRContextEncoderTokenizer
-        query_tokenizer = FLMRQueryEncoderTokenizer.from_pretrained(self.config.checkpoint, subfolder="query_tokenizer")
-        context_tokenizer = FLMRContextEncoderTokenizer.from_pretrained(self.config.checkpoint, subfolder="context_tokenizer")
+        from flmr import FLMRModelForIndexing, FLMRQueryEncoderTokenizer, FLMRContextEncoderTokenizer, FLMRConfig
+        flmr_config = FLMRConfig.from_pretrained(self.config.checkpoint)
+        query_tokenizer = FLMRQueryEncoderTokenizer.from_pretrained(self.config.checkpoint,
+                                                                    text_config=flmr_config.text_config,
+                                                                    subfolder="query_tokenizer")
+        context_tokenizer = FLMRContextEncoderTokenizer.from_pretrained(self.config.checkpoint,
+                                                                        text_config=flmr_config.text_config,
+                                                                        subfolder="context_tokenizer")
+        config.dim = flmr_config.dim
+
         self.checkpoint = FLMRModelForIndexing.from_pretrained(self.config.checkpoint, 
                                                                 query_tokenizer=query_tokenizer, 
                                                                 context_tokenizer=context_tokenizer)

@@ -1,5 +1,5 @@
 # M2KR Benchmark Datasets
-We release the M2KR Benchmark datasets in Huggingface Dataset format.
+We release the M2KR and M2KR-CN Benchmark datasets in Huggingface Dataset format.
 
 We pre-process the datasets into a uniform format and write several task-specific prompting instructions for each dataset. The details of the instruction can be found in the paper. The M2KR benchmark contains three types of tasks:
 #### Image to Text (I2T) retrieval
@@ -43,6 +43,14 @@ We show the dataset statistics in the following table:
             <td>40K</td>
         </tr>
         <tr>
+            <td>WIT_CN</td>
+            <td>281k</td>
+            <td>2,010</td>
+            <td>512</td>
+            <td>412k</td>
+            <td>4K</td>
+        </tr>
+        <tr>
             <td><i>IGLUE</i></td>
             <td>-</td>
             <td>-</td>
@@ -59,7 +67,23 @@ We show the dataset statistics in the following table:
             <td>4,648</td>
         </tr>
         <tr>
+            <td>KVQA_CN</td>
+            <td>65K</td>
+            <td>13,365</td>
+            <td>5,120</td>
+            <td>16.3K</td>
+            <td>4,648</td>
+        </tr>
+        <tr>
             <td>CC3M</td>
+            <td>595K</td>
+            <td>-</td>
+            <td>-</td>
+            <td>595K</td>
+            <td>-</td>
+        </tr>
+        <tr>
+            <td>CC3M_CN</td>
             <td>595K</td>
             <td>-</td>
             <td>-</td>
@@ -78,10 +102,26 @@ We show the dataset statistics in the following table:
             <td>200K</td>
         </tr>
         <tr>
+            <td>MSMARCO_CN</td>
+            <td>99.4k</td>
+            <td>300</td>
+            <td>300</td>
+            <td>107k</td>
+            <td>5.34K</td>
+        </tr>
+        <tr>
             <td colspan="6"><b><i>IQ2T Retrieval</i></b></td>
         </tr>
         <tr>
             <td>OVEN</td>
+            <td>339K</td>
+            <td>20,000</td>
+            <td>5,120</td>
+            <td>10K</td>
+            <td>3,192</td>
+        </tr>
+        <tr>
+            <td>OVEN_CN</td>
             <td>339K</td>
             <td>20,000</td>
             <td>5,120</td>
@@ -97,7 +137,23 @@ We show the dataset statistics in the following table:
             <td>6,006</td>
         </tr>
         <tr>
+            <td>LLAVA_CN</td>
+            <td>351K</td>
+            <td>-</td>
+            <td>5,120</td>
+            <td>351K</td>
+            <td>6,006</td>
+        </tr>
+        <tr>
             <td>OKVQA</td>
+            <td>9K</td>
+            <td>5,046</td>
+            <td>5,046</td>
+            <td>110K</td>
+            <td>110K</td>
+        </tr>
+        <tr>
+            <td>OKVQA_CN</td>
             <td>9K</td>
             <td>5,046</td>
             <td>5,046</td>
@@ -113,7 +169,23 @@ We show the dataset statistics in the following table:
             <td>100K</td>
         </tr>
         <tr>
+            <td>Infoseek_CN</td>
+            <td>100K</td>
+            <td>-</td>
+            <td>4,708</td>
+            <td>100K</td>
+            <td>100K</td>
+        </tr>
+        <tr>
             <td>E-VQA</td>
+            <td>212K</td>
+            <td>9,852</td>
+            <td>3,750</td>
+            <td>50K</td>
+            <td>50K</td>
+        </tr>
+        <tr>
+            <td>E-VQA_CN</td>
             <td>212K</td>
             <td>9,852</td>
             <td>3,750</td>
@@ -128,6 +200,120 @@ We show the dataset statistics in the following table:
 ## Huggingface Datasets 
 We release the M2KR on the huggingface [BByrneLab/multi_task_multi_modal_knowledge_retrieval_benchmark_M2KR](https://huggingface.co/datasets/BByrneLab/multi_task_multi_modal_knowledge_retrieval_benchmark_M2KR). 
 
+M2KR_CN on the huggingface [BByrneLab/multi_task_multi_modal_knowledge_retrieval_benchmark_M2KR_CN](https://huggingface.co/datasets/BByrneLab/multi_task_multi_modal_knowledge_retrieval_benchmark_M2KR_CN)
+
+### [NEW !] M2KR CN Dataset Detail
+In the process of making the Chinese dataset, we use the [Qwen2-7B-Instruct](https://huggingface.co/Qwen/Qwen2-7B-Instruct) model for translation.
+
+#### CN Dataset Source
+For CC3M, E-VQA, KVQA, OVEN, LLAVA, OKVQA and Infoseek, we directly use the data in [M2KR](https://huggingface.co/datasets/BByrneLab/multi_task_multi_modal_knowledge_retrieval_benchmark_M2KR) to translate and obtain the Chinese datasets.
+
+For WIT, we first downsample WIT in [M2KR](https://huggingface.co/datasets/BByrneLab/multi_task_multi_modal_knowledge_retrieval_benchmark_M2KR) to 10%, and then translate them to Chinese.
+
+For MSMARCO, we directly use the mMARCO-zh in [bge-m3-data](https://huggingface.co/datasets/Shitao/bge-m3-data/blob/main/bge-m3-data.tar.gz)
+
+#### Translate Example
+We use [Qwen2-7B-Instruct](https://huggingface.co/Qwen/Qwen2-7B-Instruct) to translate our dataset.
+
+We build an OpenAI-compatible API service with VLLM to do translate, you can find useage in github repository of [Qwen2.5](https://github.com/QwenLM/Qwen2.5?tab=readme-ov-file#vllm)
+
+Due to the input length limit of large language model, we need to do some segmentation operations during the translation process.
+
+```python
+import openai
+openai.api_base = "http://localhost:8000/v1"
+openai.api_key = "none"
+
+from openai import ChatCompletion
+
+def split_text_by_length(text, max_length):
+    sentences = text.split('.')
+    segments = []
+    current_segment = ""
+
+    for sentence in sentences:
+        if len(current_segment) + len(sentence) + 1 > max_length:  # +1 for the space or punctuation
+            segments.append(current_segment.strip())
+            current_segment = sentence
+        else:
+            current_segment += " " + sentence
+
+    if current_segment:
+        segments.append(current_segment.strip())
+
+    return segments
+
+def split_text_by_length_line(text, max_length):
+    sentences = text.split('\n')
+    segments = []
+    current_segment = ""
+
+    for sentence in sentences:
+        if len(current_segment) + len(sentence) + 1 > max_length:  # +1 for the space or punctuation
+            segments.append(current_segment.strip())
+            current_segment = sentence
+        else:
+            current_segment += " " + sentence
+
+    if current_segment:
+        segments.append(current_segment.strip())
+
+    return segments
+
+def translate_with_vllm(text, prompt):
+    if len(text) < 12000:
+        input_messages = [
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": prompt.format(text)}
+        ]
+
+        chat_response = ChatCompletion.create(
+            model="Qwen2-7B-Instruct",
+            messages=input_messages,
+            stream=False
+        )
+        return chat_response.choices[0].message.content
+    else:
+        texts = split_text_by_length(text, 12000)
+        translate_result = ''
+        for t in texts:
+            if len(t) < 8000:
+                input_messages = [
+                    {"role": "system", "content": "You are a helpful assistant."},
+                    {"role": "user", "content": prompt.format(t)}
+                ]
+                chat_response = ChatCompletion.create(
+                    model="Qwen2-7B-Instruct",
+                    messages=input_messages,
+                    stream=False
+                )
+                translate_content = chat_response.choices[0].message.content
+            else:
+                translate_content = ''
+                lines = split_text_by_length_line(t, 8000)
+                for l in lines:
+                    l = l.replace("\"", "")
+                    input_messages = [
+                    {"role": "system", "content": "You are a helpful assistant."},
+                    {"role": "user", "content": prompt.format(t)}
+                ]
+                chat_response = ChatCompletion.create(
+                    model="Qwen2-7B-Instruct",
+                    messages=input_messages,
+                    stream=False
+                )
+                translate_content = translate_content + " " + chat_response.choices[0].message.content
+            translate_result = translate_result + " " + translate_content
+        return translate_result
+
+prompt = "将以下英文内容翻译成中文并仅返回给我翻译的内容：{}"
+passage_en = 'olive oil is a healthy ingredient used liberally .'
+
+passage_cn = translate_with_vllm(passage_en, prompt)
+print(passage_cn)
+# 橄榄油是一种健康的食材，使用量要丰富。
+```
+
 ## Example Use
 The datasets are available for download and use with the Huggingface datasets library. 
 
@@ -139,6 +325,11 @@ from datasets import load_dataset
 EVQA_ds = load_dataset("BByrneLab/multi_task_multi_modal_knowledge_retrieval_benchmark_M2KR", "EVQA_data")
 # WIT datasets
 WIT_ds = load_dataset("BByrneLab/multi_task_multi_modal_knowledge_retrieval_benchmark_M2KR", "WIT_data")
+# EVQA CN datasets
+EVQA_CN_ds = load_dataset("BByrneLab/multi_task_multi_modal_knowledge_retrieval_benchmark_M2KR_CN", "EVQA_data")
+# WIT CN datasets
+WIT_CN_ds = load_dataset("BByrneLab/multi_task_multi_modal_knowledge_retrieval_benchmark_M2KR_CN", "WIT_data")
+
 # ...
 ``` 
 Each datasets contains the train/val/test split:
@@ -153,6 +344,10 @@ test_ds = WIT_ds['test']
 EVQA_passages = load_dataset("BByrneLab/multi_task_multi_modal_knowledge_retrieval_benchmark_M2KR", "EVQA_passages")
 # WIT passages
 WIT_passages = load_dataset("BByrneLab/multi_task_multi_modal_knowledge_retrieval_benchmark_M2KR", "WIT_passages")
+# EVQA CN passages
+EVQA_CN_passages = load_dataset("BByrneLab/multi_task_multi_modal_knowledge_retrieval_benchmark_M2KR", "EVQA_passages")
+# WIT CN passages
+WIT_CN_passages = load_dataset("BByrneLab/multi_task_multi_modal_knowledge_retrieval_benchmark_M2KR", "WIT_passages")
 # ...
 ```
 Each dataset contains the passages for the train/val/test split:
