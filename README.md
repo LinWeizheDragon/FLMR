@@ -8,6 +8,7 @@ The details of the model and checkpoints can be found [here](#models-and-benchma
 The details for reproducing the datasets and evaluation in the paper can be found [here](docs/Datasets.md).
 
 ## Updates
+- [19/12/2024] 🔥🔥🔥Release Multilingual version(Chinese + English ) of PreFLMR, you can download PreFLMR ENCN model [here](https://huggingface.co/LinWeizheDragon/PreFLMR_ViT-L_ENCN).
 - [03/09/2024] We have uploaded the images used in the M2KR benchmark [here](https://huggingface.co/datasets/BByrneLab/M2KR_Images) .
 - [10/08/2024] We received many requests regarding adding multilingual abilities to PreFLMR. We announce that **we are now training the Chinese version of PreFLMR and will release it very soon**. Stay tuned!
 - [05/06/2024] 🔥🔥🔥We made some updates to the implementation
@@ -21,6 +22,7 @@ The details for reproducing the datasets and evaluation in the paper can be foun
   - [Updates](#updates)
   - [Table of Contents](#table-of-contents)
   - [Models and Benchmark Results](#models-and-benchmark-results)
+  - [Models and Benchmark Results for the M2KR Amd M2KR-CN (the Chinese split of the M2KR)](#models-and-benchmark-results-for-the-m2kr-amd-m2kr-cn-the-chinese-split-of-the-m2kr)
   - [How to use this package](#how-to-use-this-package)
     - [Environment](#environment)
     - [Index a custom document collection](#index-a-custom-document-collection)
@@ -29,6 +31,7 @@ The details for reproducing the datasets and evaluation in the paper can be foun
   - [Alternative: use transformers.AutoModel to load pre-trained models](#alternative-use-transformersautomodel-to-load-pre-trained-models)
   - [Use example scripts](#use-example-scripts)
     - [Use FLMR](#use-flmr)
+    - [\[NEW!\] Use PreFLMR\_ENCN](#new-use-preflmr_encn)
     - [\[NEW!\] Use PreFLMR](#new-use-preflmr)
     - [\[NEW!\] Evaluate the PreFLMR models on all M2KR benchmarks](#new-evaluate-the-preflmr-models-on-all-m2kr-benchmarks)
     - [\[NEW!\] Finetune the PreFLMR model on downstream datasets](#new-finetune-the-preflmr-model-on-downstream-datasets)
@@ -39,7 +42,6 @@ The details for reproducing the datasets and evaluation in the paper can be foun
   - [Citation](#citation)
 
 ## Models and Benchmark Results
-
 | Model         | WIT Recall@10 | IGLUE Recall@1 | KVQA Recall@5 | MSMARCO Recall@5 | OVEN Recall@5 | LLaVA Recall@1 | EVQA Recall@5 | EVQA Pseudo Recall@5 | OKVQA Recall@5 | OKVQA Pseudo Recall@5 | Infoseek Recall@5 | Infoseek Pseudo Recall@5 |
 |---------------|---------------|----------------|---------------|------------------|---------------|----------------|---------------|----------------------|----------------|-----------------------|-------------------|--------------------------|
 | [LinWeizheDragon/PreFLMR_ViT-G🤗](https://huggingface.co/LinWeizheDragon/PreFLMR_ViT-G) | 0.619         | 0.718          | 0.419         | 0.783            | 0.643         | 0.726          | 0.625         | 0.721                | 0.302          | 0.674                 | 0.392             | 0.577                    |
@@ -47,6 +49,12 @@ The details for reproducing the datasets and evaluation in the paper can be foun
 | [LinWeizheDragon/PreFLMR_ViT-B🤗](https://huggingface.co/LinWeizheDragon/PreFLMR_ViT-B) | 0.427         | 0.574          | 0.294         | 0.786            | 0.468         | 0.673          | 0.550         | 0.663                | 0.272          | 0.658                 | 0.260             | 0.496                    |
 
 **Note:** We converted the checkpoints from PyTorch to Huggingface-transformers, whose benchmark results differ from the numbers reported in the original paper slightly. You can reproduce the results in the above paper by referring to the instructions in [this document](docs/Datasets.md).
+
+## Models and Benchmark Results for the M2KR Amd M2KR-CN (the Chinese split of the M2KR)
+|                            Model                             | WIT(EN) Recall@10 | WIT(CN) Recall@10 | KVQA(EN) Recall@5 | KVQA(EN) Recall@5 | MSMARCO(EN) Recall@5 | MSMARCO(CN) Recall@5 | OVEN(EN) Recall@5 | OVEN(CN) Recall@5 | LLaVA(EN) Recall@1 | LLaVA(CN) Recall@1 | EVQA(EN) Recall@5 | EVQA(CN) Recall@5 | OKVQA(EN) Recall@5 | OKVQA(CN) Recall@5 | Infoseek(EN) Recall@5 | Infoseek(CN) Recall@5 |
+| :----------------------------------------------------------: | :---------------: | :---------------: | :---------------: | :---------------: | :------------------: | :------------------: | :---------------: | :---------------: | :----------------: | :----------------: | :---------------: | :---------------: | :----------------: | :----------------: | :-------------------: | :-------------------: |
+| [LinWeizheDragon/PreFLMR_ViT-L🤗](https://huggingface.co/LinWeizheDragon/PreFLMR_ViT-L) |       60.5        |       10.9        |       43.6        |        3.2        |         78.7         |         10.3         |       59.8        |        6.6        |        71.8        |        3.2         |       70.8        |        2.8        |        68.5        |        2.1         |         57.9          |          7.9          |
+| [LinWeizheDragon/PreFLMR_ViT-L_ENCN🤗](https://huggingface.co/LinWeizheDragon/PreFLMR_ViT-L_ENCN) |       60.8        |       83.4        |       41.05       |       37.27       |         82.6         |        82.33         |       60.8        |       58.83       |       71.11        |       58.93        |       57.97       |       46.64       |       13.87        |       13.32        |         41.91         |         39.70         |
 
 ## How to use this package
 
@@ -322,6 +330,40 @@ python example_use_flmr.py \
             --query_batch_size 8 \
             --num_ROIs 9 \
 ```
+
+### [NEW!] Use PreFLMR_ENCN
+```bash
+cd examples/
+```
+
+Run the following command (remove `--run_indexing` if you have already run indexing once):
+
+```bash
+python example_use_preflmr.py \
+            --use_gpu --run_indexing \
+            --index_root_path "." \
+            --index_name EVQA_PreFLMR_ViT-L_ENCN \
+            --experiment_name EVQA \
+            --indexing_batch_size 64 \
+            --image_root_dir /rds/project/rds-hirYTW1FQIw/shared_space/vqa_data/KBVQA_data/EVQA/eval_image/ \
+            --dataset_hf_path BByrneLab/multi_task_multi_modal_knowledge_retrieval_benchmark_M2KR_CN \
+            --dataset EVQA \
+            --use_split test \
+            --nbits 8 \
+            --Ks 1 5 10 20 50 100 500 \
+            --checkpoint_path LinWeizheDragon/PreFLMR_ViT-L_ENCN \
+            --image_processor_name laion/CLIP-ViT-bigG-14-laion2B-39B-b160k \
+            --query_batch_size 8 \
+            --compute_pseudo_recall \
+```
+
+Here, we upload all the M2KR_CN datasets into one HF dataset `BByrneLab/multi_task_multi_modal_knowledge_retrieval_benchmark_M2KR_CN` with different datasets as subset.
+To reproduce results of the other datasets in the paper, you can change the `--dataset` to `OKVQA`, `KVQA`, `LLaVA`, `OVEN`, `Infoseek`, `WIT`, `IGLUE` and `EVQA`.
+
+**Updates**:
+
+- Enable `--compute_pseudo_recall` to compute pseudo recall for datasets like EVQA/OKVQA/Infoseek
+- Enable `--Ks 1 5 10 20 50 100 500`: max(Ks) needs to be 500 to match the performance reported in the PreFLMR paper.
 
 ### [NEW!] Use PreFLMR
 You can download the E-VQA images from https://github.com/google-research/google-research/tree/master/encyclopedic_vqa. We will add a dataset link here soon.
