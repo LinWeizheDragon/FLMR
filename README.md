@@ -8,7 +8,7 @@ The details of the model and checkpoints can be found [here](#models-and-benchma
 The details for reproducing the datasets and evaluation in the paper can be found [here](docs/Datasets.md).
 
 ## Updates
-- [19/12/2024] 🔥🔥🔥 The M2KR benchmark is now featured in the Efficient Representation Learning for Multimodal Information Retrieval Workshop at [WWW 2025](https://www2025.thewebconf.org/)! Check it out here: [Multimodal Document Retrieval Challenge](https://erel-mir.github.io/challenge/mdr-track1/)
+- [26/1/2025] 🔥🔥🔥 The M2KR benchmark is now featured in the Efficient Representation Learning for Multimodal Information Retrieval Workshop at [WWW 2025](https://www2025.thewebconf.org/)! Check it out here: [Multimodal Document Retrieval Challenge](https://erel-mir.github.io/challenge/mdr-track1/)
 - [19/12/2024] 🔥🔥🔥 We released the multilingual version (Chinese + English) of PreFLMR, you can download PreFLMR ENCN model [here](https://huggingface.co/LinWeizheDragon/PreFLMR_ViT-L_ENCN).
 - [03/09/2024] We have uploaded the images used in the M2KR benchmark [here](https://huggingface.co/datasets/BByrneLab/M2KR_Images) .
 - [10/08/2024] We received many requests regarding adding multilingual abilities to PreFLMR. We announce that **we are now training the Chinese version of PreFLMR and will release it very soon**. Stay tuned!
