@@ -97,7 +97,7 @@ pip install -e .
 
 Install other dependencies
 ```
-pip install ujson gitpython easydict ninja datasets transformers
+pip install ujson gitpython easydict ninja datasets transformers==4.49
 ```
 
 ### Index a custom document collection
@@ -111,15 +111,16 @@ pip install ujson gitpython easydict ninja datasets transformers
     from transformers import AutoImageProcessor
 
     from flmr import index_custom_collection
-    from flmr import FLMRQueryEncoderTokenizer, FLMRContextEncoderTokenizer, FLMRModelForRetrieval
+    from flmr import FLMRQueryEncoderTokenizer, FLMRContextEncoderTokenizer, FLMRModelForRetrieval, FLMRConfig
 
     # load models
     checkpoint_path = "LinWeizheDragon/PreFLMR_ViT-G"
     image_processor_name = "laion/CLIP-ViT-bigG-14-laion2B-39B-b160k"
-
-    query_tokenizer = FLMRQueryEncoderTokenizer.from_pretrained(checkpoint_path, subfolder="query_tokenizer")
+    flmr_config = FLMRConfig.from_pretrained(checkpoint_path)
+    
+    query_tokenizer = FLMRQueryEncoderTokenizer.from_pretrained(checkpoint_path, text_config=flmr_config.text_config, subfolder="query_tokenizer")
     context_tokenizer = FLMRContextEncoderTokenizer.from_pretrained(
-        checkpoint_path, subfolder="context_tokenizer"
+        checkpoint_path, text_config=flmr_config.text_config, subfolder="context_tokenizer"
     )
 
     model = FLMRModelForRetrieval.from_pretrained(
