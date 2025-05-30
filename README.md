@@ -246,12 +246,13 @@ pip install ujson gitpython easydict ninja datasets transformers==4.49
 ### Training with contrastive learning
 ```python
 import torch
-from flmr import FLMRQueryEncoderTokenizer, FLMRContextEncoderTokenizer, FLMRModelForRetrieval
+from flmr import FLMRQueryEncoderTokenizer, FLMRContextEncoderTokenizer, FLMRModelForRetrieval, FLMRConfig
 
 checkpoint_path = "LinWeizheDragon/PreFLMR_ViT-L"
 image_processor_name = "openai/clip-vit-large-patch14"
-query_tokenizer = FLMRQueryEncoderTokenizer.from_pretrained(checkpoint_path, subfolder="query_tokenizer")
-context_tokenizer = FLMRContextEncoderTokenizer.from_pretrained(checkpoint_path, subfolder="context_tokenizer")
+flmr_config = FLMRConfig.from_pretrained(checkpoint_path)
+query_tokenizer = FLMRQueryEncoderTokenizer.from_pretrained(checkpoint_path, text_config=flmr_config.text_config, subfolder="query_tokenizer")
+context_tokenizer = FLMRContextEncoderTokenizer.from_pretrained(checkpoint_path, text_config=flmr_config.text_config, subfolder="context_tokenizer")
 
 model = FLMRModelForRetrieval.from_pretrained(checkpoint_path,
                                                 query_tokenizer=query_tokenizer,
